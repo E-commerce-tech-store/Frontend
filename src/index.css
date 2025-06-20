@@ -1,0 +1,73 @@
+@import 'tailwindcss';
+
+:root {
+  font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
+  line-height: 1.5;
+  font-weight: 400;
+
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+@theme {
+  --color-primary: #065c5f;
+  --color-sky: #38bdf8;
+  --color-violet: #c4b5fd;
+  --color-sky-dark: #0ea5e9;
+  --color-violet-dark: #a78bfa;
+  --color-white: #ffffff;
+  --color-gray: #f3f4f6;
+  --color-gray-dark: #374151;
+}
+
+body {
+  position: relative;
+  min-height: 100vh;
+  background: linear-gradient(135deg, #e0f2fe 0%, #f3e8ff 100%);
+  overflow-x: hidden;
+}
+body::before,
+body::after {
+  content: '';
+  position: fixed;
+  z-index: -10;
+  pointer-events: none;
+  border-radius: 50%;
+  filter: blur(60px);
+  opacity: 0.22;
+  transition: opacity 0.3s;
+}
+body::before {
+  width: 18rem;
+  height: 18rem;
+  top: -6rem;
+  left: -6rem;
+  background: #38bdf8;
+}
+body::after {
+  width: 22rem;
+  height: 22rem;
+  bottom: -8rem;
+  right: -8rem;
+  background: #c4b5fd;
+}
+@media (max-width: 640px) {
+  body::before {
+    width: 10rem;
+    height: 10rem;
+    top: -3rem;
+    left: -3rem;
+  }
+  body::after {
+    width: 12rem;
+    height: 12rem;
+    bottom: -4rem;
+    right: -4rem;
+  }
+}
+body::after {
+  /* Add a subtle overlay for contrast if needed */
+  box-shadow: 0 0 0 100vw rgba(255, 255, 255, 0.08) inset;
+}
