@@ -4,7 +4,11 @@ module.exports = {
   plugins: [...(require('./eslint.config.js').plugins || []), 'prettier'],
   extends: [...(require('./eslint.config.js').extends || []), 'plugin:prettier/recommended'],
   rules: {
-    ...(require('./eslint.config.js').rules || {}),
-    'prettier/prettier': 'warn'
-  }
+    'prettier/prettier': [
+      'error',
+      {
+        "endOfLine": 'auto',
+      },
+    ],
+  },
 };

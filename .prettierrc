@@ -4,10 +4,5 @@
   "printWidth": 100,
   "tabWidth": 2,
   "trailingComma": "none",
-  "prettier/prettier": [
-    "error",
-    {
-      "endOfLine": "auto"
-    }
-  ]
+  "endOfLine": "auto"
 }
