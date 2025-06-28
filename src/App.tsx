@@ -124,6 +124,28 @@ export default function App() {
           />
 
           <Route
+            path="/admin/products"
+            element={
+              <Layout>
+                <PrivateRoute role="admin">
+                  <AdminDashboard />
+                </PrivateRoute>
+              </Layout>
+            }
+          />
+
+          <Route
+            path="/admin/reports"
+            element={
+              <Layout>
+                <PrivateRoute role="admin">
+                  <AdminDashboard />
+                </PrivateRoute>
+              </Layout>
+            }
+          />
+
+          <Route
             path="/admin/categories"
             element={
               <Layout>

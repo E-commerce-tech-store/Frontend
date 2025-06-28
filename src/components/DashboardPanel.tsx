@@ -6,9 +6,6 @@ import {
   HomeIcon,
   ShoppingBagIcon,
   ChartBarIcon,
-  TagIcon,
-  ShoppingCartIcon,
-  UserGroupIcon,
   BellIcon,
   ArrowLeftIcon,
   ArrowRightIcon
@@ -39,25 +36,25 @@ const DEFAULT_MENU: MenuItem[] = [
     label: 'Reportes',
     path: '/admin/reports',
     icon: <ChartBarIcon className="h-5 w-5" />
-  },
-  {
-    key: 'categories',
-    label: 'Categorías',
-    path: '/admin/categories',
-    icon: <TagIcon className="h-5 w-5" />
-  },
-  {
-    key: 'orders',
-    label: 'Órdenes',
-    path: '/admin/orders',
-    icon: <ShoppingCartIcon className="h-5 w-5" />
-  },
-  {
-    key: 'users',
-    label: 'Usuarios',
-    path: '/admin/users',
-    icon: <UserGroupIcon className="h-5 w-5" />
   }
+  // {
+  //   key: 'categories',
+  //   label: 'Categorías',
+  //   path: '/admin/categories',
+  //   icon: <TagIcon className="h-5 w-5" />
+  // }
+  // {
+  //   key: 'orders',
+  //   label: 'Órdenes',
+  //   path: '/admin/orders',
+  //   icon: <ShoppingCartIcon className="h-5 w-5" />
+  // },
+  // {
+  //   key: 'users',
+  //   label: 'Usuarios',
+  //   path: '/admin/users',
+  //   icon: <UserGroupIcon className="h-5 w-5" />
+  // }
 ];
 
 interface DashboardPanelProps {
