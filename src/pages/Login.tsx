@@ -1,5 +1,6 @@
 import { useNavigate, useLocation, Link } from 'react-router-dom';
 import { useState, useEffect } from 'react';
+import toast from 'react-hot-toast';
 import { useLogin } from '../hooks/useAuth';
 import { useAuth } from '../context/AuthContext';
 
@@ -10,7 +11,7 @@ export default function Login({ redirectToDashboard }: { redirectToDashboard?: b
   const location = useLocation();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [errors, setErrors] = useState<{ email?: string; password?: string; general?: string }>({});
+  const [errors, setErrors] = useState<{ email?: string; password?: string }>({});
 
   // Redirect if already authenticated
   useEffect(() => {
@@ -49,18 +50,15 @@ export default function Login({ redirectToDashboard }: { redirectToDashboard?: b
       return;
     }
 
-    setErrors({});
-
     try {
       await loginMutation.mutateAsync({ email, password });
-
-      // Navigation will be handled by the useEffect above
+      toast.success('¡Inicio de sesión exitoso!');
     } catch (error: unknown) {
       console.error('Login error:', error);
       const axiosError = error as { response?: { data?: { message?: string } } };
-      setErrors({
-        general: axiosError.response?.data?.message || 'Login failed. Please try again.'
-      });
+      const errorMessage =
+        axiosError.response?.data?.message || 'Error al iniciar sesión. Inténtalo de nuevo.';
+      toast.error(errorMessage);
     }
   };
 
@@ -73,12 +71,6 @@ export default function Login({ redirectToDashboard }: { redirectToDashboard?: b
       <h2 className="text-2xl font-bold mb-6 text-gray-900 z-10">Login</h2>
 
       <form onSubmit={handleLogin} className="w-full z-10">
-        {errors.general && (
-          <div className="mb-4 p-3 bg-red-100 border border-red-400 text-red-700 rounded-lg">
-            {errors.general}
-          </div>
-        )}
-
         <div className="mb-4">
           <input
             type="email"

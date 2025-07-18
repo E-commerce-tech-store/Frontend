@@ -1,4 +1,5 @@
 import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
+import { Toaster } from 'react-hot-toast';
 import Cart from './components/Cart';
 import OrderHistory from './components/OrderHistory';
 import UserProfile from './components/UserProfile';
@@ -162,6 +163,12 @@ export default function App() {
             }
           />
         </Routes>
+        <Toaster
+          position="top-right"
+          toastOptions={{
+            position: 'bottom-center'
+          }}
+        />
       </Router>
     </AuthProvider>
   );

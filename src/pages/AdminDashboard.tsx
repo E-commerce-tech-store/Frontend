@@ -1,9 +1,12 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useProductStore } from '../store/productStore';
+import { useCategoryStore } from '../store/categoryStore';
 import DashboardPanel from '../components/DashboardPanel';
 import ProductForm from '../components/ProductForm';
+import CategoryForm from '../components/CategoryForm';
 import AdminOnlySection from '../components/AdminOnlySection';
 import type { Product } from '../store/productStore';
+import type { Category } from '../store/categoryStore';
 import {
   PlusIcon,
   PencilIcon,
@@ -13,17 +16,29 @@ import {
   ArrowUpIcon,
   ChartBarIcon,
   CurrencyDollarIcon,
-  ShoppingBagIcon
+  ShoppingBagIcon,
+  TagIcon
 } from '@heroicons/react/24/outline';
 
 export default function AdminDashboard() {
   // Get path to determine which section to show
   const path = window.location.pathname;
   const { products, deleteProduct } = useProductStore();
+  const {
+    categories,
+    loading: categoryLoading,
+    error: categoryError,
+    fetchCategoriesWithCount,
+    createCategory,
+    updateCategory,
+    deleteCategory,
+    clearError
+  } = useCategoryStore();
 
   // Set the active section based on the current path
   const getInitialSection = () => {
     if (path.includes('/admin/products')) return 'products';
+    if (path.includes('/admin/categories')) return 'categories';
     if (path.includes('/admin/reports')) return 'reports';
     return 'summary'; // default
   };
@@ -32,6 +47,12 @@ export default function AdminDashboard() {
   const [showProductForm, setShowProductForm] = useState(false);
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState<string | null>(null);
+
+  // Category-related state
+  const [showCategoryForm, setShowCategoryForm] = useState(false);
+  const [editingCategory, setEditingCategory] = useState<Category | null>(null);
+  const [showCategoryDeleteConfirm, setShowCategoryDeleteConfirm] = useState<string | null>(null);
+
   const [salesData] = useState([
     { month: 'Ene', sales: 1200000 },
     { month: 'Feb', sales: 1500000 },
@@ -40,6 +61,13 @@ export default function AdminDashboard() {
     { month: 'May', sales: 1600000 },
     { month: 'Jun', sales: 2100000 }
   ]);
+
+  // Load categories when component mounts or when categories section is active
+  useEffect(() => {
+    if (currentSection === 'categories') {
+      fetchCategoriesWithCount();
+    }
+  }, [currentSection, fetchCategoriesWithCount]);
 
   // const [categoryData] = useState([
   //   { category: 'Electronics', sales: 4500000 },
@@ -96,6 +124,51 @@ export default function AdminDashboard() {
     setShowDeleteConfirm(null);
   };
 
+  // Category handlers
+  const handleAddCategory = () => {
+    setEditingCategory(null);
+    setShowCategoryForm(true);
+  };
+
+  const handleEditCategory = (category: Category) => {
+    setEditingCategory(category);
+    setShowCategoryForm(true);
+  };
+
+  const handleSaveCategory = async (categoryData: { name: string; description: string }) => {
+    try {
+      if (editingCategory) {
+        await updateCategory(editingCategory.id, categoryData);
+      } else {
+        await createCategory(categoryData);
+      }
+      setShowCategoryForm(false);
+      setEditingCategory(null);
+    } catch (error) {
+      // Error is handled in the store
+      console.error('Error saving category:', error);
+    }
+  };
+
+  const handleCategoryDeleteConfirm = (categoryId: string) => {
+    setShowCategoryDeleteConfirm(categoryId);
+  };
+
+  const handleDeleteCategory = async (categoryId: string) => {
+    try {
+      await deleteCategory(categoryId);
+      setShowCategoryDeleteConfirm(null);
+    } catch (error) {
+      // Error is handled in the store
+      console.error('Error deleting category:', error);
+    }
+  };
+
+  // Close category error
+  const handleCloseCategoryError = () => {
+    clearError();
+  };
+
   return (
     <DashboardPanel title="Panel de Negocio" activeKey={currentSection}>
       <div className="mb-6 border-b border-gray-200">
@@ -124,6 +197,19 @@ export default function AdminDashboard() {
             >
               <ShoppingBagIcon className="w-4 h-4 mr-2" />
               Productos
+            </button>
+          </li>
+          <li className="mr-2">
+            <button
+              onClick={() => setCurrentSection('categories')}
+              className={`inline-flex items-center p-4 border-b-2 rounded-t-lg ${
+                currentSection === 'categories'
+                  ? 'text-sky-600 border-sky-600 active'
+                  : 'border-transparent hover:text-gray-600 hover:border-gray-300'
+              }`}
+            >
+              <TagIcon className="w-4 h-4 mr-2" />
+              Categorías
             </button>
           </li>
           <li className="mr-2">
@@ -431,6 +517,154 @@ export default function AdminDashboard() {
                 </tbody>
               </table>
             </div>
+          </div>
+        </section>
+      )}
+
+      {/* CATEGORIES SECTION */}
+      {currentSection === 'categories' && (
+        <section className="z-10">
+          <div className="flex justify-between items-center mb-6">
+            <h2 className="text-xl font-bold text-gray-800">Gestión de Categorías</h2>
+            <button
+              onClick={handleAddCategory}
+              className="py-2 px-4 bg-sky-600 hover:bg-sky-700 text-white rounded-lg flex items-center gap-2 transition-colors shadow-md"
+            >
+              <PlusIcon className="h-5 w-5" />
+              <span>Nueva Categoría</span>
+            </button>
+          </div>
+
+          {/* Error Display */}
+          {categoryError && (
+            <div className="mb-4 p-4 bg-red-100 border border-red-400 text-red-700 rounded-lg flex justify-between items-center">
+              <span>{categoryError}</span>
+              <button
+                onClick={handleCloseCategoryError}
+                className="text-red-600 hover:text-red-800"
+              >
+                <XMarkIcon className="h-5 w-5" />
+              </button>
+            </div>
+          )}
+
+          {/* Category Form Modal */}
+          {showCategoryForm && (
+            <CategoryForm
+              category={editingCategory}
+              onSave={handleSaveCategory}
+              onCancel={() => {
+                setShowCategoryForm(false);
+                setEditingCategory(null);
+              }}
+              loading={categoryLoading}
+            />
+          )}
+
+          {/* Categories List */}
+          <div className="bg-white/90 rounded-2xl shadow overflow-hidden">
+            {categoryLoading ? (
+              <div className="py-8 text-center text-gray-500">
+                <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-sky-600"></div>
+                <p className="mt-2">Cargando categorías...</p>
+              </div>
+            ) : (
+              <div className="overflow-x-auto">
+                <table className="w-full text-left border-collapse">
+                  <thead>
+                    <tr className="bg-sky-100 text-sky-700">
+                      <th className="py-3 px-4 font-semibold">Nombre</th>
+                      <th className="py-3 px-4 font-semibold">Descripción</th>
+                      <th className="py-3 px-4 font-semibold text-center">Productos</th>
+                      <th className="py-3 px-4 font-semibold text-right">Acciones</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {categories.map((category) => (
+                      <tr
+                        key={category.id}
+                        className="border-b last:border-b-0 hover:bg-sky-50/40 transition"
+                      >
+                        <td className="py-3 px-4 font-medium">{category.name}</td>
+                        <td className="py-3 px-4 text-gray-600 max-w-xs truncate">
+                          {category.description}
+                        </td>
+                        <td className="py-3 px-4 text-center">
+                          <span className="inline-flex items-center justify-center w-8 h-8 bg-sky-100 text-sky-800 rounded-full text-sm font-medium">
+                            {category.productCount || 0}
+                          </span>
+                        </td>
+                        <td className="py-3 px-4 text-right">
+                          <div className="flex justify-end gap-2">
+                            <button
+                              onClick={() => handleEditCategory(category)}
+                              className="p-1.5 bg-sky-100 rounded-md text-sky-700 hover:bg-sky-200 transition-colors"
+                              title="Editar categoría"
+                            >
+                              <PencilIcon className="h-4 w-4" />
+                            </button>
+                            <button
+                              onClick={() => handleCategoryDeleteConfirm(category.id)}
+                              className="p-1.5 bg-red-100 rounded-md text-red-700 hover:bg-red-200 transition-colors"
+                              title="Eliminar categoría"
+                            >
+                              <TrashIcon className="h-4 w-4" />
+                            </button>
+                          </div>
+                        </td>
+
+                        {/* Delete confirmation modal */}
+                        {showCategoryDeleteConfirm === category.id && (
+                          <div className="fixed inset-0 bg-black/30 flex items-center justify-center z-50">
+                            <div className="bg-white rounded-2xl p-6 w-full max-w-sm shadow-xl">
+                              <h3 className="text-xl font-bold mb-2 text-gray-800">
+                                Confirmar Eliminación
+                              </h3>
+                              <p className="text-gray-600 mb-6">
+                                ¿Estás seguro que deseas eliminar la categoría{' '}
+                                <span className="font-semibold">{category.name}</span>?
+                                {category.productCount && category.productCount > 0 && (
+                                  <>
+                                    <br />
+                                    <span className="text-red-600 font-medium">
+                                      Esta categoría tiene {category.productCount} producto(s)
+                                      asociado(s).
+                                    </span>
+                                  </>
+                                )}
+                              </p>
+                              <div className="flex justify-end gap-3">
+                                <button
+                                  onClick={() => setShowCategoryDeleteConfirm(null)}
+                                  className="py-2 px-4 bg-gray-100 hover:bg-gray-200 rounded-lg text-gray-800 transition-colors"
+                                >
+                                  Cancelar
+                                </button>
+                                <button
+                                  onClick={() => handleDeleteCategory(category.id)}
+                                  className="py-2 px-4 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-colors"
+                                  disabled={categoryLoading}
+                                >
+                                  {categoryLoading ? 'Eliminando...' : 'Eliminar'}
+                                </button>
+                              </div>
+                            </div>
+                          </div>
+                        )}
+                      </tr>
+                    ))}
+
+                    {categories.length === 0 && !categoryLoading && (
+                      <tr>
+                        <td colSpan={4} className="py-8 text-center text-gray-500">
+                          No hay categorías disponibles. Agrega una nueva categoría para comenzar.
+                        </td>
+                      </tr>
+                    )}
+                  </tbody>
+                </table>
+              </div>
+            )}
           </div>
         </section>
       )}

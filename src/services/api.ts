@@ -27,11 +27,37 @@ api.interceptors.response.use(
   (response) => response,
   (error) => {
     if (error.response?.status === 401) {
-      // Token expired or invalid
-      localStorage.removeItem('auth_token');
-      localStorage.removeItem('user_data');
-      window.location.href = '/login';
+      const isLoginRequest = error.config?.url?.includes('/auth/login');
+      const isOnLoginPage = window.location.pathname === '/login';
+
+      if (!isLoginRequest && !isOnLoginPage) {
+        localStorage.removeItem('auth_token');
+        localStorage.removeItem('user_data');
+        window.location.href = '/login';
+      }
     }
     return Promise.reject(error);
   }
 );
+
+// Category API endpoints
+export const categoryAPI = {
+  // Get all categories (Public)
+  getAll: () => api.get('/categories'),
+
+  // Get categories with product count (Public)
+  getWithCount: () => api.get('/categories/with-count'),
+
+  // Get category by ID (Public)
+  getById: (id: string) => api.get(`/categories/${id}`),
+
+  // Create new category (Admin only)
+  create: (category: { name: string; description: string }) => api.post('/categories', category),
+
+  // Update category (Admin only)
+  update: (id: string, category: { name: string; description: string }) =>
+    api.put(`/categories/${id}`, category),
+
+  // Delete category (Admin only)
+  delete: (id: string) => api.delete(`/categories/${id}`)
+};

@@ -1,5 +1,6 @@
 import { useNavigate, Link } from 'react-router-dom';
 import { useState, useEffect } from 'react';
+import toast from 'react-hot-toast';
 import { useRegister } from '../hooks/useAuth';
 import { useAuth } from '../context/AuthContext';
 
@@ -18,7 +19,6 @@ export default function Register() {
     email?: string;
     password?: string;
     confirmPassword?: string;
-    general?: string;
   }>({});
 
   // Redirect if already authenticated
@@ -88,13 +88,14 @@ export default function Register() {
         password: formData.password
       });
 
+      toast.success('¡Registro exitoso! Bienvenido.');
       // Navigation will be handled by the useEffect above
     } catch (error: unknown) {
       console.error('Registration error:', error);
       const axiosError = error as { response?: { data?: { message?: string } } };
-      setErrors({
-        general: axiosError.response?.data?.message || 'Registration failed. Please try again.'
-      });
+      const errorMessage =
+        axiosError.response?.data?.message || 'Error en el registro. Inténtalo de nuevo.';
+      toast.error(errorMessage);
     }
   };
 
@@ -107,12 +108,6 @@ export default function Register() {
       <h2 className="text-2xl font-bold mb-6 text-gray-900 z-10">Register</h2>
 
       <form onSubmit={handleRegister} className="w-full z-10">
-        {errors.general && (
-          <div className="mb-4 p-3 bg-red-100 border border-red-400 text-red-700 rounded-lg">
-            {errors.general}
-          </div>
-        )}
-
         <div className="mb-4">
           <input
             type="text"
