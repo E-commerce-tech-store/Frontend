@@ -1,18 +1,18 @@
 import './App.css';
-import { AuthProvider } from './context/AuthContext';
+import { AuthProvider } from '@features/auth/context/AuthContext';
 import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
 import { Toaster } from 'react-hot-toast';
-import AdminDashboard from './pages/AdminDashboard';
-import Cart from './components/Cart';
-import CategorySection from './components/CategorySection';
-import Header from './components/Header';
-import HeroSection from './components/HeroSection';
-import Login from './pages/Login';
-import OrderHistory from './components/OrderHistory';
-import ProductGrid from './components/ProductGrid';
-import ProtectedRoute from './components/ProtectedRoute';
-import Register from './pages/Register';
-import UserProfile from './components/UserProfile';
+import AdminDashboard from '@features/dashboard/components/AdminDashboard';
+import Cart from '@features/cart/components/Cart';
+import CategorySection from '@features/categories/components/CategorySection';
+import Header from '@shared/components/Header';
+import HeroSection from '@shared/components/HeroSection';
+import Login from '@features/auth/components/Login';
+import OrderHistory from '@features/orders/components/OrderHistory';
+import ProductGrid from '@features/products/components/ProductGrid';
+import ProtectedRoute from '@shared/components/ProtectedRoute';
+import Register from '@features/auth/components/Register';
+import UserProfile from '@features/users/components/UserProfile';
 
 // Layout component that conditionally renders the header based on route
 function Layout({ children }: { children: React.ReactNode }) {
