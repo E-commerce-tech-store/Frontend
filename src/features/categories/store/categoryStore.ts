@@ -5,8 +5,11 @@ import { categoryAPI } from '@shared/services/api';
 export interface Category {
   id: string;
   name: string;
-  description: string;
-  productCount?: number;
+  status: boolean;
+  created_at: string;
+  _count: {
+    tbl_products: number;
+  };
 }
 
 interface CategoryStore {

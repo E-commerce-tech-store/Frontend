@@ -128,11 +128,11 @@ export default function CategoriesSection() {
                   >
                     <td className="py-3 px-4 font-medium">{category.name}</td>
                     <td className="py-3 px-4 text-gray-600 max-w-xs truncate">
-                      {category.description}
+                      {/* {category.description} */}
                     </td>
                     <td className="py-3 px-4 text-center">
                       <span className="inline-flex items-center justify-center w-8 h-8 bg-sky-100 text-sky-800 rounded-full text-sm font-medium">
-                        {category.productCount || 0}
+                        {category._count.tbl_products || 0}
                       </span>
                     </td>
                     <td className="py-3 px-4 text-right">
@@ -180,13 +180,17 @@ export default function CategoriesSection() {
                 {categories.find((c) => c.id === showCategoryDeleteConfirm)?.name}
               </span>
               ?
-              {categories.find((c) => c.id === showCategoryDeleteConfirm)?.productCount &&
-                categories.find((c) => c.id === showCategoryDeleteConfirm)!.productCount! > 0 && (
+              {categories.find((c) => c.id === showCategoryDeleteConfirm)?._count.tbl_products &&
+                categories.find((c) => c.id === showCategoryDeleteConfirm)!._count.tbl_products >
+                  0 && (
                   <>
                     <br />
                     <span className="text-red-600 font-medium">
                       Esta categoría tiene{' '}
-                      {categories.find((c) => c.id === showCategoryDeleteConfirm)?.productCount}{' '}
+                      {
+                        categories.find((c) => c.id === showCategoryDeleteConfirm)?._count
+                          .tbl_products
+                      }{' '}
                       producto(s) asociado(s).
                     </span>
                   </>
