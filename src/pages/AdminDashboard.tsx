@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useProductStore } from '../store/productStore';
 import DashboardPanel from '../components/DashboardPanel';
 import ProductForm from '../components/ProductForm';
+import AdminOnlySection from '../components/AdminOnlySection';
 import type { Product } from '../store/productStore';
 import {
   PlusIcon,
@@ -278,6 +279,11 @@ export default function AdminDashboard() {
                 </button>
               </div>
             </div>
+          </div>
+
+          {/* Admin Only Section */}
+          <div className="mt-6">
+            <AdminOnlySection />
           </div>
         </section>
       )}

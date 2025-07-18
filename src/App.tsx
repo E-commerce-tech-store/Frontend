@@ -1,6 +1,8 @@
-import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
 import Cart from './components/Cart';
 import OrderHistory from './components/OrderHistory';
+import UserProfile from './components/UserProfile';
+import ProtectedRoute from './components/ProtectedRoute';
 import Login from './pages/Login';
 import Register from './pages/Register';
 import AdminDashboard from './pages/AdminDashboard';
@@ -27,13 +29,6 @@ function Layout({ children }: { children: React.ReactNode }) {
   );
 }
 
-function PrivateRoute({ children, role }: { children: React.ReactElement; role: string }) {
-  // const { user } = useAuth();
-  // if (!user) return <Navigate to="/login" />;
-  // if (role && user.role !== role) return <Navigate to="/" />;
-  return children;
-}
-
 export default function App() {
   return (
     <AuthProvider>
@@ -55,7 +50,7 @@ export default function App() {
             path="/login"
             element={
               <Layout>
-                <Login redirectToDashboard />
+                <Login />
               </Layout>
             }
           />
@@ -79,12 +74,23 @@ export default function App() {
           />
 
           <Route
+            path="/dashboard"
+            element={
+              <Layout>
+                <ProtectedRoute>
+                  <UserProfile />
+                </ProtectedRoute>
+              </Layout>
+            }
+          />
+
+          <Route
             path="/orders"
             element={
               <Layout>
-                <PrivateRoute role="client">
+                <ProtectedRoute>
                   <OrderHistory />
-                </PrivateRoute>
+                </ProtectedRoute>
               </Layout>
             }
           />
@@ -94,9 +100,9 @@ export default function App() {
             path="/admin/dashboard"
             element={
               <Layout>
-                <PrivateRoute role="admin">
+                <ProtectedRoute requireAdmin>
                   <AdminDashboard />
-                </PrivateRoute>
+                </ProtectedRoute>
               </Layout>
             }
           />
@@ -105,9 +111,9 @@ export default function App() {
             path="/admin/products"
             element={
               <Layout>
-                <PrivateRoute role="admin">
+                <ProtectedRoute requireAdmin>
                   <AdminDashboard />
-                </PrivateRoute>
+                </ProtectedRoute>
               </Layout>
             }
           />
@@ -116,31 +122,9 @@ export default function App() {
             path="/admin/reports"
             element={
               <Layout>
-                <PrivateRoute role="admin">
+                <ProtectedRoute requireAdmin>
                   <AdminDashboard />
-                </PrivateRoute>
-              </Layout>
-            }
-          />
-
-          <Route
-            path="/admin/products"
-            element={
-              <Layout>
-                <PrivateRoute role="admin">
-                  <AdminDashboard />
-                </PrivateRoute>
-              </Layout>
-            }
-          />
-
-          <Route
-            path="/admin/reports"
-            element={
-              <Layout>
-                <PrivateRoute role="admin">
-                  <AdminDashboard />
-                </PrivateRoute>
+                </ProtectedRoute>
               </Layout>
             }
           />
@@ -149,9 +133,9 @@ export default function App() {
             path="/admin/categories"
             element={
               <Layout>
-                <PrivateRoute role="admin">
+                <ProtectedRoute requireAdmin>
                   <AdminDashboard />
-                </PrivateRoute>
+                </ProtectedRoute>
               </Layout>
             }
           />
@@ -160,9 +144,9 @@ export default function App() {
             path="/admin/orders"
             element={
               <Layout>
-                <PrivateRoute role="admin">
+                <ProtectedRoute requireAdmin>
                   <AdminDashboard />
-                </PrivateRoute>
+                </ProtectedRoute>
               </Layout>
             }
           />
@@ -171,9 +155,9 @@ export default function App() {
             path="/admin/users"
             element={
               <Layout>
-                <PrivateRoute role="admin">
+                <ProtectedRoute requireAdmin>
                   <AdminDashboard />
-                </PrivateRoute>
+                </ProtectedRoute>
               </Layout>
             }
           />

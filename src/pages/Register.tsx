@@ -1,67 +1,201 @@
+import { useNavigate, Link } from 'react-router-dom';
+import { useState, useEffect } from 'react';
+import { useRegister } from '../hooks/useAuth';
 import { useAuth } from '../context/AuthContext';
-import { useNavigate } from 'react-router-dom';
-import { useState } from 'react';
 
 export default function Register() {
-  const { login } = useAuth();
+  const { isAuthenticated } = useAuth();
+  const registerMutation = useRegister();
   const navigate = useNavigate();
-  const [username, setUsername] = useState('');
-  const [password, setPassword] = useState('');
-  const [confirmPassword, setConfirmPassword] = useState('');
-  const [error, setError] = useState('');
+  const [formData, setFormData] = useState({
+    name: '',
+    email: '',
+    password: '',
+    confirmPassword: ''
+  });
+  const [errors, setErrors] = useState<{
+    name?: string;
+    email?: string;
+    password?: string;
+    confirmPassword?: string;
+    general?: string;
+  }>({});
 
-  function handleRegister(role: 'client') {
-    if (!username || !password) {
-      setError('Please fill all fields.');
+  // Redirect if already authenticated
+  useEffect(() => {
+    if (isAuthenticated) {
+      navigate('/');
+    }
+  }, [isAuthenticated, navigate]);
+
+  const validateForm = () => {
+    const newErrors: {
+      name?: string;
+      email?: string;
+      password?: string;
+      confirmPassword?: string;
+    } = {};
+
+    if (!formData.name.trim()) {
+      newErrors.name = 'Name is required';
+    } else if (formData.name.trim().length < 2) {
+      newErrors.name = 'Name must be at least 2 characters';
+    }
+
+    if (!formData.email) {
+      newErrors.email = 'Email is required';
+    } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
+      newErrors.email = 'Email is invalid';
+    }
+
+    if (!formData.password) {
+      newErrors.password = 'Password is required';
+    } else if (formData.password.length < 6) {
+      newErrors.password = 'Password must be at least 6 characters';
+    }
+
+    if (!formData.confirmPassword) {
+      newErrors.confirmPassword = 'Please confirm your password';
+    } else if (formData.password !== formData.confirmPassword) {
+      newErrors.confirmPassword = 'Passwords do not match';
+    }
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({
+      ...prev,
+      [name]: value
+    }));
+  };
+
+  const handleRegister = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    if (!validateForm()) {
       return;
     }
-    if (password !== confirmPassword) {
-      setError('Passwords do not match.');
-      return;
+
+    setErrors({});
+
+    try {
+      await registerMutation.mutateAsync({
+        name: formData.name.trim(),
+        email: formData.email,
+        password: formData.password
+      });
+
+      // Navigation will be handled by the useEffect above
+    } catch (error: unknown) {
+      console.error('Registration error:', error);
+      const axiosError = error as { response?: { data?: { message?: string } } };
+      setErrors({
+        general: axiosError.response?.data?.message || 'Registration failed. Please try again.'
+      });
     }
-    // For demo, just log in after register
-    login({ username, role });
-    navigate('/');
-  }
+  };
 
   return (
     <div className="relative max-w-sm mx-auto mt-20 p-8 bg-gradient-to-br from-white/90 via-sky-600/10 to-violet-100/60 rounded-3xl shadow-lg border border-gray-100 flex flex-col items-center overflow-hidden">
       {/* Blurred background shapes */}
       <div className="absolute -top-8 -left-8 w-24 h-24 bg-sky-600/20 rounded-full blur-xl opacity-40 pointer-events-none animate-pulse" />
       <div className="absolute -bottom-8 -right-8 w-20 h-20 bg-violet-200/30 rounded-full blur-lg opacity-30 pointer-events-none animate-pulse" />
+
       <h2 className="text-2xl font-bold mb-6 text-gray-900 z-10">Register</h2>
-      <input
-        type="text"
-        placeholder="Username"
-        value={username}
-        onChange={(e) => setUsername(e.target.value)}
-        className="w-full mb-4 px-3 py-2 border border-gray-200 rounded-2xl focus:outline-none focus:ring-2 focus:ring-sky-400 bg-white/80 shadow-sm z-10"
-      />
-      <input
-        type="password"
-        placeholder="Password"
-        value={password}
-        onChange={(e) => setPassword(e.target.value)}
-        className="w-full mb-4 px-3 py-2 border border-gray-200 rounded-2xl focus:outline-none focus:ring-2 focus:ring-sky-400 bg-white/80 shadow-sm z-10"
-      />
-      <input
-        type="password"
-        placeholder="Confirm Password"
-        value={confirmPassword}
-        onChange={(e) => setConfirmPassword(e.target.value)}
-        className="w-full mb-6 px-3 py-2 border border-gray-200 rounded-2xl focus:outline-none focus:ring-2 focus:ring-sky-400 bg-white/80 shadow-sm z-10"
-      />
-      {error && <div className="text-red-600 mb-4 w-full text-center z-10">{error}</div>}
-      <button
-        onClick={() => handleRegister('client')}
-        className="w-full bg-gray-800 hover:bg-gray-900 text-white font-semibold py-2 rounded-2xl transition-colors mb-2 shadow z-10"
-      >
-        Register
-      </button>
+
+      <form onSubmit={handleRegister} className="w-full z-10">
+        {errors.general && (
+          <div className="mb-4 p-3 bg-red-100 border border-red-400 text-red-700 rounded-lg">
+            {errors.general}
+          </div>
+        )}
+
+        <div className="mb-4">
+          <input
+            type="text"
+            name="name"
+            placeholder="Full Name"
+            value={formData.name}
+            onChange={handleInputChange}
+            className={`w-full px-3 py-2 border rounded-2xl focus:outline-none focus:ring-2 bg-white/80 shadow-sm ${
+              errors.name
+                ? 'border-red-400 focus:ring-red-400'
+                : 'border-gray-200 focus:ring-sky-400'
+            }`}
+            disabled={registerMutation.isPending}
+          />
+          {errors.name && <p className="text-red-500 text-sm mt-1">{errors.name}</p>}
+        </div>
+
+        <div className="mb-4">
+          <input
+            type="email"
+            name="email"
+            placeholder="Email"
+            value={formData.email}
+            onChange={handleInputChange}
+            className={`w-full px-3 py-2 border rounded-2xl focus:outline-none focus:ring-2 bg-white/80 shadow-sm ${
+              errors.email
+                ? 'border-red-400 focus:ring-red-400'
+                : 'border-gray-200 focus:ring-sky-400'
+            }`}
+            disabled={registerMutation.isPending}
+          />
+          {errors.email && <p className="text-red-500 text-sm mt-1">{errors.email}</p>}
+        </div>
+
+        <div className="mb-4">
+          <input
+            type="password"
+            name="password"
+            placeholder="Password"
+            value={formData.password}
+            onChange={handleInputChange}
+            className={`w-full px-3 py-2 border rounded-2xl focus:outline-none focus:ring-2 bg-white/80 shadow-sm ${
+              errors.password
+                ? 'border-red-400 focus:ring-red-400'
+                : 'border-gray-200 focus:ring-sky-400'
+            }`}
+            disabled={registerMutation.isPending}
+          />
+          {errors.password && <p className="text-red-500 text-sm mt-1">{errors.password}</p>}
+        </div>
+
+        <div className="mb-6">
+          <input
+            type="password"
+            name="confirmPassword"
+            placeholder="Confirm Password"
+            value={formData.confirmPassword}
+            onChange={handleInputChange}
+            className={`w-full px-3 py-2 border rounded-2xl focus:outline-none focus:ring-2 bg-white/80 shadow-sm ${
+              errors.confirmPassword
+                ? 'border-red-400 focus:ring-red-400'
+                : 'border-gray-200 focus:ring-sky-400'
+            }`}
+            disabled={registerMutation.isPending}
+          />
+          {errors.confirmPassword && (
+            <p className="text-red-500 text-sm mt-1">{errors.confirmPassword}</p>
+          )}
+        </div>
+
+        <button
+          type="submit"
+          disabled={registerMutation.isPending}
+          className="w-full bg-gray-800 hover:bg-gray-900 disabled:bg-gray-400 disabled:cursor-not-allowed text-white font-semibold py-2 rounded-2xl transition-colors mb-2 shadow"
+        >
+          {registerMutation.isPending ? 'Creating account...' : 'Register'}
+        </button>
+      </form>
+
       <div className="mt-2 z-10">
-        <a href="/login" className="text-sky-600 hover:underline">
+        <Link to="/login" className="text-sky-600 hover:underline">
           Already have an account? Login
-        </a>
+        </Link>
       </div>
     </div>
   );

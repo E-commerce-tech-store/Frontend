@@ -1,25 +1,48 @@
-import { create } from 'zustand';
-import React, { createContext, useContext } from 'react';
+import React, { createContext, useContext, useEffect } from 'react';
+import { userService, tokenService } from '../services/authService';
+import { useAuthStatus, useLogout } from '../hooks/useAuth';
+import type { User } from '../services/authService';
 
-export type User = { username: string; role: 'admin' | 'client' } | null;
-
-interface AuthState {
-  user: User;
-  login: (u: User) => void;
+interface AuthContextType {
+  user: User | null;
+  isAuthenticated: boolean;
+  isLoading: boolean;
+  isAdmin: boolean;
+  isUser: boolean;
   logout: () => void;
 }
 
-export const useAuthStore = create<AuthState>((set) => ({
-  user: null,
-  login: (u) => set({ user: u }),
-  logout: () => set({ user: null })
-}));
-
-const AuthContext = createContext<AuthState | null>(null);
+const AuthContext = createContext<AuthContextType | null>(null);
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
-  const store = useAuthStore();
-  return <AuthContext.Provider value={store}>{children}</AuthContext.Provider>;
+  const { user, isAuthenticated, isLoading, isAdmin, isUser } = useAuthStatus();
+  const logoutMutation = useLogout();
+
+  // Initialize user from localStorage on mount
+  useEffect(() => {
+    const storedUser = userService.getUser();
+    const token = tokenService.getToken();
+
+    // If no token but user data exists, clear user data
+    if (!token && storedUser) {
+      userService.removeUser();
+    }
+  }, []);
+
+  const logout = () => {
+    logoutMutation.mutate();
+  };
+
+  const value: AuthContextType = {
+    user: user || null,
+    isAuthenticated,
+    isLoading,
+    isAdmin,
+    isUser,
+    logout
+  };
+
+  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }
 
 export function useAuth() {
@@ -27,3 +50,7 @@ export function useAuth() {
   if (!context) throw new Error('useAuth must be used within AuthProvider');
   return context;
 }
+
+// Keep the old type for backward compatibility but mark as deprecated
+/** @deprecated Use User from '../services/authService' instead */
+export type OldUser = { username: string; role: 'admin' | 'client' } | null;

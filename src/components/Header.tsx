@@ -7,10 +7,11 @@ import LoginIcon from '../icons/LoginIcon';
 import { useCartStore } from '../store/cartStore';
 
 export default function Header() {
-  const { user } = useAuth();
+  const { user, isAuthenticated, logout, isAdmin } = useAuth();
   const navigate = useNavigate();
   const { items } = useCartStore();
   const [scrolled, setScrolled] = useState(false);
+  const [showUserMenu, setShowUserMenu] = useState(false);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -19,6 +20,16 @@ export default function Header() {
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
+
+  const handleLogout = () => {
+    logout();
+    setShowUserMenu(false);
+    navigate('/');
+  };
+
+  const handleUserMenuToggle = () => {
+    setShowUserMenu(!showUserMenu);
+  };
 
   return (
     <header
@@ -59,14 +70,62 @@ export default function Header() {
             {items.length}
           </span>
         </button>
-        {user ? (
-          <button className="flex items-center gap-2 bg-sky-600/10 p-1.5 rounded-full hover:bg-sky-600/20 transition-colors border border-sky-600/10 shadow focus:outline-none focus:ring-2 focus:ring-sky-600/30">
-            <img
-              className="w-9 h-9 rounded-full object-cover border-2 border-sky-600 shadow-sm"
-              src="https://flowbite.com/docs/images/people/profile-picture-5.jpg"
-              alt="Avatar"
-            />
-          </button>
+        {isAuthenticated && user ? (
+          <div className="relative">
+            <button
+              className="flex items-center gap-2 bg-sky-600/10 p-1.5 rounded-full hover:bg-sky-600/20 transition-colors border border-sky-600/10 shadow focus:outline-none focus:ring-2 focus:ring-sky-600/30"
+              onClick={handleUserMenuToggle}
+            >
+              <img
+                className="w-9 h-9 rounded-full object-cover border-2 border-sky-600 shadow-sm"
+                src="https://flowbite.com/docs/images/people/profile-picture-5.jpg"
+                alt={user.name}
+              />
+              {isAdmin && (
+                <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs font-bold px-1 py-0.5 rounded-full">
+                  A
+                </span>
+              )}
+            </button>
+
+            {showUserMenu && (
+              <div className="absolute right-0 mt-2 w-64 bg-white border border-gray-200 rounded-lg shadow-lg z-50">
+                <div className="p-4 border-b border-gray-200">
+                  <p className="font-semibold text-gray-800">{user.name}</p>
+                  <p className="text-sm text-gray-600">{user.email}</p>
+                  <p className="text-xs text-gray-500 mt-1">Role: {user.role}</p>
+                </div>
+                <div className="py-2">
+                  <button
+                    onClick={() => {
+                      navigate('/dashboard');
+                      setShowUserMenu(false);
+                    }}
+                    className="w-full text-left px-4 py-2 hover:bg-gray-100 transition-colors"
+                  >
+                    My Dashboard
+                  </button>
+                  {isAdmin && (
+                    <button
+                      onClick={() => {
+                        navigate('/admin/dashboard');
+                        setShowUserMenu(false);
+                      }}
+                      className="w-full text-left px-4 py-2 hover:bg-gray-100 transition-colors text-red-600"
+                    >
+                      Admin Dashboard
+                    </button>
+                  )}
+                  <button
+                    onClick={handleLogout}
+                    className="w-full text-left px-4 py-2 hover:bg-gray-100 transition-colors text-red-600"
+                  >
+                    Logout
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
         ) : (
           <button
             className="flex items-center gap-2 bg-sky-600/10 p-1.5 rounded-full hover:bg-sky-600/20 transition-colors border border-sky-600/10 shadow focus:outline-none focus:ring-2 focus:ring-sky-600/30"
