@@ -9,101 +9,52 @@ import {
   XMarkIcon,
   MagnifyingGlassIcon,
   ShieldCheckIcon,
-  UserGroupIcon
+  UserGroupIcon,
+  PlusIcon
 } from '@heroicons/react/24/outline';
-
-interface User {
-  id: string;
-  name: string;
-  email: string;
-  role: 'admin' | 'customer';
-  status: 'active' | 'inactive' | 'banned';
-  registrationDate: string;
-  lastLogin: string;
-  totalOrders: number;
-  totalSpent: number;
-}
+import { useUsers, useUserStats, useUpdateUserStatus, useDeleteUser } from '../hooks/useUsers';
+import UserForm from './UserForm';
+import type { User } from '../services/userService';
 
 export default function UsersSection() {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedRole, setSelectedRole] = useState<string>('all');
   const [selectedStatus, setSelectedStatus] = useState<string>('all');
   const [showUserDetail, setShowUserDetail] = useState<string | null>(null);
+  const [showUserForm, setShowUserForm] = useState(false);
 
-  // Mock users data
-  const [users] = useState<User[]>([
-    {
-      id: '1',
-      name: 'Juan Pérez',
-      email: 'juan.perez@email.com',
-      role: 'customer',
-      status: 'active',
-      registrationDate: '2024-01-15',
-      lastLogin: '2024-07-18',
-      totalOrders: 5,
-      totalSpent: 3750000
-    },
-    {
-      id: '2',
-      name: 'María García',
-      email: 'maria.garcia@email.com',
-      role: 'customer',
-      status: 'active',
-      registrationDate: '2024-02-20',
-      lastLogin: '2024-07-17',
-      totalOrders: 3,
-      totalSpent: 2250000
-    },
-    {
-      id: '3',
-      name: 'Carlos López',
-      email: 'carlos.lopez@email.com',
-      role: 'customer',
-      status: 'inactive',
-      registrationDate: '2024-03-10',
-      lastLogin: '2024-06-15',
-      totalOrders: 1,
-      totalSpent: 450000
-    },
-    {
-      id: '4',
-      name: 'Ana Martínez',
-      email: 'ana.martinez@email.com',
-      role: 'customer',
-      status: 'active',
-      registrationDate: '2024-04-05',
-      lastLogin: '2024-07-18',
-      totalOrders: 2,
-      totalSpent: 4050000
-    },
-    {
-      id: '5',
-      name: 'Admin Usuario',
-      email: 'admin@ecommerce.com',
-      role: 'admin',
-      status: 'active',
-      registrationDate: '2023-12-01',
-      lastLogin: '2024-07-18',
-      totalOrders: 0,
-      totalSpent: 0
-    },
-    {
-      id: '6',
-      name: 'Luis Rodríguez',
-      email: 'luis.rodriguez@email.com',
-      role: 'customer',
-      status: 'banned',
-      registrationDate: '2024-05-12',
-      lastLogin: '2024-07-01',
-      totalOrders: 0,
-      totalSpent: 0
-    }
-  ]);
+  // Get data from API
+  const { data: users = [], isLoading: usersLoading, error: usersError } = useUsers();
+  const { data: userStats, isLoading: statsLoading } = useUserStats();
+  const updateUserStatus = useUpdateUserStatus();
+  const deleteUser = useDeleteUser();
+
+  // Handle loading state
+  if (usersLoading || statsLoading) {
+    return (
+      <section className="z-10">
+        <div className="flex justify-center items-center h-96">
+          <div className="text-lg text-gray-600">Cargando usuarios...</div>
+        </div>
+      </section>
+    );
+  }
+
+  // Handle error state
+  if (usersError) {
+    return (
+      <section className="z-10">
+        <div className="flex justify-center items-center h-96">
+          <div className="text-lg text-red-600">Error al cargar usuarios</div>
+        </div>
+      </section>
+    );
+  }
 
   const getRoleBadge = (role: User['role']) => {
     const roleConfig = {
-      admin: { color: 'bg-purple-100 text-purple-800', icon: ShieldCheckIcon, text: 'Admin' },
-      customer: { color: 'bg-blue-100 text-blue-800', icon: UserIcon, text: 'Cliente' }
+      ADMIN: { color: 'bg-purple-100 text-purple-800', icon: ShieldCheckIcon, text: 'Admin' },
+      USER: { color: 'bg-blue-100 text-blue-800', icon: UserIcon, text: 'Cliente' }
     };
 
     const config = roleConfig[role];
@@ -121,12 +72,11 @@ export default function UsersSection() {
 
   const getStatusBadge = (status: User['status']) => {
     const statusConfig = {
-      active: { color: 'bg-green-100 text-green-800', text: 'Activo' },
-      inactive: { color: 'bg-gray-100 text-gray-800', text: 'Inactivo' },
-      banned: { color: 'bg-red-100 text-red-800', text: 'Bloqueado' }
+      true: { color: 'bg-green-100 text-green-800', text: 'Activo' },
+      false: { color: 'bg-red-100 text-red-800', text: 'Inactivo' }
     };
 
-    const config = statusConfig[status];
+    const config = statusConfig[status.toString() as keyof typeof statusConfig];
 
     return (
       <span
@@ -142,17 +92,29 @@ export default function UsersSection() {
       user.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       user.email.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesRole = selectedRole === 'all' || user.role === selectedRole;
-    const matchesStatus = selectedStatus === 'all' || user.status === selectedStatus;
+    const matchesStatus =
+      selectedStatus === 'all' ||
+      (selectedStatus === 'active' && user.status) ||
+      (selectedStatus === 'inactive' && !user.status);
     return matchesSearch && matchesRole && matchesStatus;
   });
 
-  const userStats = {
+  const calculatedStats = {
     total: users.length,
-    customers: users.filter((u) => u.role === 'customer').length,
-    admins: users.filter((u) => u.role === 'admin').length,
-    active: users.filter((u) => u.status === 'active').length,
-    inactive: users.filter((u) => u.status === 'inactive').length,
-    banned: users.filter((u) => u.status === 'banned').length
+    customers: users.filter((u) => u.role === 'USER').length,
+    admins: users.filter((u) => u.role === 'ADMIN').length,
+    active: users.filter((u) => u.status).length,
+    inactive: users.filter((u) => !u.status).length
+  };
+
+  const handleStatusChange = (userId: string, newStatus: boolean) => {
+    updateUserStatus.mutate({ id: userId, status: newStatus });
+  };
+
+  const handleDeleteUser = (userId: string) => {
+    if (window.confirm('¿Estás seguro de que quieres eliminar este usuario?')) {
+      deleteUser.mutate(userId);
+    }
   };
 
   return (
@@ -160,36 +122,41 @@ export default function UsersSection() {
       {/* Header */}
       <div className="flex justify-between items-center mb-6">
         <h2 className="text-xl font-bold text-gray-800">Gestión de Usuarios</h2>
-        <div className="text-sm text-gray-600">
-          Total de usuarios: <span className="font-medium">{users.length}</span>
+        <div className="flex items-center gap-4">
+          <div className="text-sm text-gray-600">
+            Total de usuarios: <span className="font-medium">{users.length}</span>
+          </div>
+          <button
+            onClick={() => setShowUserForm(true)}
+            className="flex items-center gap-2 px-4 py-2 bg-sky-600 text-white rounded-lg hover:bg-sky-700 transition-colors"
+          >
+            <PlusIcon className="h-4 w-4" />
+            Crear Usuario
+          </button>
         </div>
       </div>
 
       {/* Stats Cards */}
-      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 mb-6">
+      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 mb-6">
         <div className="bg-white/80 rounded-xl shadow p-4 text-center">
-          <div className="text-2xl font-bold text-gray-800">{userStats.total}</div>
+          <div className="text-2xl font-bold text-gray-800">{userStats?.totalUsers || 0}</div>
           <div className="text-sm text-gray-500">Total</div>
         </div>
         <div className="bg-white/80 rounded-xl shadow p-4 text-center">
-          <div className="text-2xl font-bold text-blue-600">{userStats.customers}</div>
+          <div className="text-2xl font-bold text-blue-600">{userStats?.regularUsers || 0}</div>
           <div className="text-sm text-gray-500">Clientes</div>
         </div>
         <div className="bg-white/80 rounded-xl shadow p-4 text-center">
-          <div className="text-2xl font-bold text-purple-600">{userStats.admins}</div>
+          <div className="text-2xl font-bold text-purple-600">{userStats?.adminUsers || 0}</div>
           <div className="text-sm text-gray-500">Admins</div>
         </div>
         <div className="bg-white/80 rounded-xl shadow p-4 text-center">
-          <div className="text-2xl font-bold text-green-600">{userStats.active}</div>
+          <div className="text-2xl font-bold text-green-600">{calculatedStats.active}</div>
           <div className="text-sm text-gray-500">Activos</div>
         </div>
         <div className="bg-white/80 rounded-xl shadow p-4 text-center">
-          <div className="text-2xl font-bold text-gray-600">{userStats.inactive}</div>
+          <div className="text-2xl font-bold text-red-600">{calculatedStats.inactive}</div>
           <div className="text-sm text-gray-500">Inactivos</div>
-        </div>
-        <div className="bg-white/80 rounded-xl shadow p-4 text-center">
-          <div className="text-2xl font-bold text-red-600">{userStats.banned}</div>
-          <div className="text-sm text-gray-500">Bloqueados</div>
         </div>
       </div>
 
@@ -215,8 +182,8 @@ export default function UsersSection() {
               className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-sky-500 focus:border-transparent"
             >
               <option value="all">Todos los roles</option>
-              <option value="customer">Clientes</option>
-              <option value="admin">Administradores</option>
+              <option value="USER">Clientes</option>
+              <option value="ADMIN">Administradores</option>
             </select>
           </div>
           <div>
@@ -228,7 +195,6 @@ export default function UsersSection() {
               <option value="all">Todos los estados</option>
               <option value="active">Activo</option>
               <option value="inactive">Inactivo</option>
-              <option value="banned">Bloqueado</option>
             </select>
           </div>
         </div>
@@ -244,7 +210,7 @@ export default function UsersSection() {
                 <th className="py-3 px-4 font-semibold">Rol</th>
                 <th className="py-3 px-4 font-semibold">Estado</th>
                 <th className="py-3 px-4 font-semibold">Registro</th>
-                <th className="py-3 px-4 font-semibold">Último acceso</th>
+                <th className="py-3 px-4 font-semibold">Última orden</th>
                 <th className="py-3 px-4 font-semibold">Pedidos</th>
                 <th className="py-3 px-4 font-semibold">Total gastado</th>
                 <th className="py-3 px-4 font-semibold text-right">Acciones</th>
@@ -270,10 +236,12 @@ export default function UsersSection() {
                   <td className="py-3 px-4">{getRoleBadge(user.role)}</td>
                   <td className="py-3 px-4">{getStatusBadge(user.status)}</td>
                   <td className="py-3 px-4">
-                    {new Date(user.registrationDate).toLocaleDateString('es-CO')}
+                    {new Date(user.created_at).toLocaleDateString('es-CO')}
                   </td>
                   <td className="py-3 px-4">
-                    {new Date(user.lastLogin).toLocaleDateString('es-CO')}
+                    {user.lastOrderDate
+                      ? new Date(user.lastOrderDate).toLocaleDateString('es-CO')
+                      : 'Nunca'}
                   </td>
                   <td className="py-3 px-4 text-center">{user.totalOrders}</td>
                   <td className="py-3 px-4">
@@ -299,8 +267,9 @@ export default function UsersSection() {
                       >
                         <PencilIcon className="h-4 w-4" />
                       </button>
-                      {user.role !== 'admin' && (
+                      {user.role !== 'ADMIN' && (
                         <button
+                          onClick={() => handleDeleteUser(user.id)}
                           className="p-1.5 bg-red-100 rounded-md text-red-700 hover:bg-red-200 transition-colors"
                           title="Eliminar usuario"
                         >
@@ -367,19 +336,22 @@ export default function UsersSection() {
                         <div className="flex items-center gap-2">
                           <CalendarIcon className="h-4 w-4 text-gray-400" />
                           <span>
-                            Registro: {new Date(user.registrationDate).toLocaleDateString('es-CO')}
+                            Registro: {new Date(user.created_at).toLocaleDateString('es-CO')}
                           </span>
                         </div>
                         <div className="flex items-center gap-2">
                           <EnvelopeIcon className="h-4 w-4 text-gray-400" />
                           <span>
-                            Último acceso: {new Date(user.lastLogin).toLocaleDateString('es-CO')}
+                            Última orden:{' '}
+                            {user.lastOrderDate
+                              ? new Date(user.lastOrderDate).toLocaleDateString('es-CO')
+                              : 'Sin órdenes'}
                           </span>
                         </div>
                       </div>
                     </div>
 
-                    {user.role === 'customer' && (
+                    {user.role === 'USER' && (
                       <div>
                         <h4 className="font-semibold text-gray-800 mb-3">
                           Estadísticas de Compras
@@ -416,26 +388,22 @@ export default function UsersSection() {
                     )}
                   </div>
 
-                  {user.role !== 'admin' && (
+                  {user.role !== 'ADMIN' && (
                     <div className="pt-4 border-t border-gray-200 flex gap-3 justify-end">
-                      {user.status === 'active' && (
-                        <button className="px-4 py-2 bg-yellow-600 text-white rounded-lg hover:bg-yellow-700 transition-colors">
-                          Suspender Usuario
+                      {user.status && (
+                        <button
+                          onClick={() => handleStatusChange(user.id, false)}
+                          className="px-4 py-2 bg-yellow-600 text-white rounded-lg hover:bg-yellow-700 transition-colors"
+                        >
+                          Desactivar Usuario
                         </button>
                       )}
-                      {user.status === 'inactive' && (
-                        <button className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors">
+                      {!user.status && (
+                        <button
+                          onClick={() => handleStatusChange(user.id, true)}
+                          className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
+                        >
                           Activar Usuario
-                        </button>
-                      )}
-                      {user.status !== 'banned' && (
-                        <button className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors">
-                          Bloquear Usuario
-                        </button>
-                      )}
-                      {user.status === 'banned' && (
-                        <button className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
-                          Desbloquear Usuario
                         </button>
                       )}
                     </div>
@@ -446,6 +414,9 @@ export default function UsersSection() {
           </div>
         </div>
       )}
+
+      {/* User Form Modal */}
+      <UserForm isOpen={showUserForm} onClose={() => setShowUserForm(false)} />
     </section>
   );
 }
