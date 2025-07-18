@@ -1,4 +1,5 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
 import DashboardPanel from '@/features/dashboard/components/DashboardPanel';
 import SummarySection from '@features/summary/components/SummarySection';
 import ProductsSection from '@features/products/components/ProductsSection';
@@ -21,8 +22,11 @@ export default function AdminDashboard() {
   // Fetch products data - TanStack Query will handle caching and refetching
   useProducts();
 
+  const navigate = useNavigate();
+  const location = useLocation();
+
   // Get path to determine which section to show
-  const path = window.location.pathname;
+  const path = location.pathname;
 
   // Set the active section based on the current path
   const getInitialSection = () => {
@@ -36,10 +40,54 @@ export default function AdminDashboard() {
 
   const [currentSection, setCurrentSection] = useState(getInitialSection());
 
+  // Update currentSection when the URL changes
+  useEffect(() => {
+    const getCurrentSection = () => {
+      if (path.includes('/admin/products')) return 'products';
+      if (path.includes('/admin/categories')) return 'categories';
+      if (path.includes('/admin/reports')) return 'reports';
+      if (path.includes('/admin/orders')) return 'orders';
+      if (path.includes('/admin/users')) return 'users';
+      return 'summary'; // default
+    };
+
+    const section = getCurrentSection();
+    setCurrentSection(section);
+  }, [path]);
+
+  // Handle navigation to different sections
+  const handleSectionChange = (section: string) => {
+    setCurrentSection(section);
+
+    // Navigate to the appropriate route
+    switch (section) {
+      case 'summary':
+        navigate('/admin/dashboard');
+        break;
+      case 'products':
+        navigate('/admin/products');
+        break;
+      case 'categories':
+        navigate('/admin/categories');
+        break;
+      case 'reports':
+        navigate('/admin/reports');
+        break;
+      case 'orders':
+        navigate('/admin/orders');
+        break;
+      case 'users':
+        navigate('/admin/users');
+        break;
+      default:
+        navigate('/admin/dashboard');
+    }
+  };
+
   // Handle adding a new product (for the summary section)
   const handleAddProduct = () => {
-    // This will be handled by ProductsSection internally when the section changes
-    setCurrentSection('products');
+    // Navigate to products section
+    handleSectionChange('products');
   };
 
   return (
@@ -48,7 +96,7 @@ export default function AdminDashboard() {
         <ul className="flex flex-wrap -mb-px text-sm font-medium text-center">
           <li className="mr-2">
             <button
-              onClick={() => setCurrentSection('summary')}
+              onClick={() => handleSectionChange('summary')}
               className={`inline-flex items-center p-4 border-b-2 rounded-t-lg ${
                 currentSection === 'summary'
                   ? 'text-sky-600 border-sky-600 active'
@@ -61,7 +109,7 @@ export default function AdminDashboard() {
           </li>
           <li className="mr-2">
             <button
-              onClick={() => setCurrentSection('products')}
+              onClick={() => handleSectionChange('products')}
               className={`inline-flex items-center p-4 border-b-2 rounded-t-lg ${
                 currentSection === 'products'
                   ? 'text-sky-600 border-sky-600 active'
@@ -74,7 +122,7 @@ export default function AdminDashboard() {
           </li>
           <li className="mr-2">
             <button
-              onClick={() => setCurrentSection('categories')}
+              onClick={() => handleSectionChange('categories')}
               className={`inline-flex items-center p-4 border-b-2 rounded-t-lg ${
                 currentSection === 'categories'
                   ? 'text-sky-600 border-sky-600 active'
@@ -87,7 +135,7 @@ export default function AdminDashboard() {
           </li>
           <li className="mr-2">
             <button
-              onClick={() => setCurrentSection('reports')}
+              onClick={() => handleSectionChange('reports')}
               className={`inline-flex items-center p-4 border-b-2 rounded-t-lg ${
                 currentSection === 'reports'
                   ? 'text-sky-600 border-sky-600 active'
@@ -100,7 +148,7 @@ export default function AdminDashboard() {
           </li>
           <li className="mr-2">
             <button
-              onClick={() => setCurrentSection('orders')}
+              onClick={() => handleSectionChange('orders')}
               className={`inline-flex items-center p-4 border-b-2 rounded-t-lg ${
                 currentSection === 'orders'
                   ? 'text-sky-600 border-sky-600 active'
@@ -113,7 +161,7 @@ export default function AdminDashboard() {
           </li>
           <li className="mr-2">
             <button
-              onClick={() => setCurrentSection('users')}
+              onClick={() => handleSectionChange('users')}
               className={`inline-flex items-center p-4 border-b-2 rounded-t-lg ${
                 currentSection === 'users'
                   ? 'text-sky-600 border-sky-600 active'
@@ -129,7 +177,7 @@ export default function AdminDashboard() {
 
       {/* SUMMARY SECTION */}
       {currentSection === 'summary' && (
-        <SummarySection onSectionChange={setCurrentSection} onAddProduct={handleAddProduct} />
+        <SummarySection onSectionChange={handleSectionChange} onAddProduct={handleAddProduct} />
       )}
 
       {/* PRODUCTS SECTION */}
