@@ -38,12 +38,6 @@ export default function SummarySection({ onSectionChange, onAddProduct }: Summar
           <span className="text-3xl font-bold text-emerald-700">{totalCategories}</span>
           <span className="text-gray-500">Categorías</span>
         </div>
-        <div className="bg-white/80 rounded-2xl shadow p-6 flex flex-col items-center">
-          <span className="text-3xl font-bold text-amber-700">
-            {totalRevenue.toLocaleString('es-CO', { style: 'currency', currency: 'COP' })}
-          </span>
-          <span className="text-gray-500">Ingresos estimados</span>
-        </div>
       </div>
 
       <h2 className="text-xl font-bold text-gray-800 mb-4">Productos recientes</h2>

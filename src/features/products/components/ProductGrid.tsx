@@ -4,7 +4,7 @@ import { CheckCircleIcon } from '@heroicons/react/24/solid';
 import { useProducts } from '../hooks/useProducts';
 import { useCartStore } from '@features/cart/store/cartStore';
 import { formatCOP } from '@shared/utils/formatCOP';
-import type { Product } from '../interfaces/product';
+import type { TransformedProduct } from '../interfaces/product';
 
 export default function ProductGrid() {
   const { data: products = [], isLoading: loading, error } = useProducts();
@@ -17,7 +17,7 @@ export default function ProductGrid() {
     toast.error('Error al cargar los productos');
   }
 
-  const handleAddToCart = (product: Product) => {
+  const handleAddToCart = (product: TransformedProduct) => {
     const qty = quantities[product.id] || 1;
     for (let i = 0; i < qty; i++) addToCart(product);
     setAddedId(product.id);
@@ -55,7 +55,7 @@ export default function ProductGrid() {
             Nuevo
           </div>
           <img
-            src={product.image_url}
+            src={product.image}
             alt={product.name}
             className="w-36 h-36 object-contain mb-5 rounded-2xl bg-gray-50 shadow-md z-10 group-hover:scale-110 transition-transform duration-300"
           />

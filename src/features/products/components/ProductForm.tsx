@@ -2,10 +2,10 @@ import React, { useState, useEffect } from 'react';
 import toast from 'react-hot-toast';
 import { useCreateProduct, useUpdateProduct } from '../hooks/useProducts';
 import { useCategoryStore } from '@features/categories/store/categoryStore';
-import type { Product } from '@/features/products/interfaces/product';
+import type { TransformedProduct } from '@/features/products/interfaces/product';
 
 interface ProductFormProps {
-  product?: Product;
+  product?: TransformedProduct;
   onSave?: () => void;
 }
 
@@ -14,10 +14,10 @@ export default function ProductForm({ product, onSave }: ProductFormProps) {
   const [form, setForm] = useState({
     name: product?.name ?? '',
     price: product?.price ?? 0,
-    category_id: product?.category_id ?? '',
+    category_id: product?.categoryId ?? '',
     stock: product?.stock ?? 0,
     description: product?.description ?? '',
-    image_url: product?.image_url ?? ''
+    image_url: product?.image ?? ''
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const createProductMutation = useCreateProduct();
@@ -44,10 +44,28 @@ export default function ProductForm({ product, onSave }: ProductFormProps) {
 
     try {
       if (isEdit && product) {
-        await updateProductMutation.mutateAsync({ id: product.id, data: form });
+        // Transform form data to TransformedProduct format for update
+        const updateData = {
+          name: form.name,
+          price: Number(form.price),
+          categoryId: form.category_id,
+          stock: Number(form.stock),
+          description: form.description,
+          image: form.image_url
+        };
+        await updateProductMutation.mutateAsync({ id: product.id, data: updateData });
         toast.success('Producto actualizado exitosamente');
       } else {
-        await createProductMutation.mutateAsync(form);
+        // Transform form data to ProductFormData format for creation
+        const createData = {
+          name: form.name,
+          price: Number(form.price),
+          category_id: form.category_id,
+          stock: Number(form.stock),
+          description: form.description,
+          image_url: form.image_url
+        };
+        await createProductMutation.mutateAsync(createData);
         toast.success('Producto creado exitosamente');
       }
       if (onSave) onSave();
@@ -143,7 +161,7 @@ export default function ProductForm({ product, onSave }: ProductFormProps) {
         </label>
         <select
           id="categoryId"
-          name="categoryId"
+          name="category_id"
           value={form.category_id}
           onChange={handleChange}
           className="w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-sky-500"
@@ -173,12 +191,12 @@ export default function ProductForm({ product, onSave }: ProductFormProps) {
       </div>
 
       <div className="mb-4">
-        <label htmlFor="image" className="block text-sm font-medium text-gray-700 mb-1">
+        <label htmlFor="image_url" className="block text-sm font-medium text-gray-700 mb-1">
           URL de la imagen
         </label>
         <input
-          id="image"
-          name="image"
+          id="image_url"
+          name="image_url"
           value={form.image_url}
           onChange={handleChange}
           placeholder="URL de la imagen del producto"

@@ -2,7 +2,7 @@ import { useState } from 'react';
 import toast from 'react-hot-toast';
 import { useProducts, useDeleteProduct } from '../hooks/useProducts';
 import ProductForm from './ProductForm';
-import type { Product } from '../interfaces/product';
+import type { TransformedProduct } from '../interfaces/product';
 import {
   PlusIcon,
   PencilIcon,
@@ -15,7 +15,7 @@ export default function ProductsSection() {
   const { data: products = [] } = useProducts();
   const deleteProductMutation = useDeleteProduct();
   const [showProductForm, setShowProductForm] = useState(false);
-  const [editingProduct, setEditingProduct] = useState<Product | null>(null);
+  const [editingProduct, setEditingProduct] = useState<TransformedProduct | null>(null);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState<string | null>(null);
 
   // Handle adding a new product
@@ -25,7 +25,7 @@ export default function ProductsSection() {
   };
 
   // Handle editing a product
-  const handleEditProduct = (product: Product) => {
+  const handleEditProduct = (product: TransformedProduct) => {
     setEditingProduct(product);
     setShowProductForm(true);
   };
@@ -120,9 +120,9 @@ export default function ProductsSection() {
                   className="border-b last:border-b-0 hover:bg-sky-50/40 transition"
                 >
                   <td className="py-3 px-4">
-                    {product.image_url ? (
+                    {product.image ? (
                       <img
-                        src={product.image_url}
+                        src={product.image}
                         alt={product.name}
                         className="w-12 h-12 object-cover rounded-md"
                       />
@@ -141,7 +141,7 @@ export default function ProductsSection() {
                   </td>
                   <td className="py-3 px-4">
                     <span className="px-2 py-1 bg-sky-100 text-sky-800 rounded-md text-xs">
-                      {product.category || product.category_id || 'Sin categoría'}
+                      {product.category || 'Sin categoría'}
                     </span>
                   </td>
                   <td className="py-3 px-4">

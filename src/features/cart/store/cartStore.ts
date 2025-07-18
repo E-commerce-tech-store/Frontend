@@ -1,13 +1,13 @@
 import { create } from 'zustand';
-import type { Product } from '@/features/products/interfaces/product';
+import type { TransformedProduct } from '@/features/products/interfaces/product';
 
-export interface CartItem extends Product {
+export interface CartItem extends TransformedProduct {
   quantity: number;
 }
 
 interface CartState {
   items: CartItem[];
-  addToCart: (product: Product) => void;
+  addToCart: (product: TransformedProduct) => void;
   removeFromCart: (id: string) => void;
   updateQuantity: (id: string, quantity: number) => void;
   clearCart: () => void;
