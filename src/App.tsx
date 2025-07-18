@@ -4,7 +4,7 @@ import OrderHistory from './components/OrderHistory';
 import Login from './pages/Login';
 import Register from './pages/Register';
 import AdminDashboard from './pages/AdminDashboard';
-import { AuthProvider, useAuth } from './context/AuthContext';
+import { AuthProvider } from './context/AuthContext';
 import Header from './components/Header';
 import HeroSection from './components/HeroSection';
 import ProductGrid from './components/ProductGrid';

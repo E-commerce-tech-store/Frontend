@@ -12,7 +12,7 @@ export default function Login({ redirectToDashboard }: { redirectToDashboard?: b
     // For demo, just use the username
     login({ username, role: 'client' });
     if (redirectToDashboard) {
-      navigate('/dashboard');
+      navigate('/admin/dashboard');
     } else {
       navigate(location.state?.from || '/');
     }
