@@ -1,17 +1,18 @@
+import './App.css';
+import { AuthProvider } from './context/AuthContext';
 import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
 import { Toaster } from 'react-hot-toast';
-import Cart from './components/Cart';
-import OrderHistory from './components/OrderHistory';
-import UserProfile from './components/UserProfile';
-import ProtectedRoute from './components/ProtectedRoute';
-import Login from './pages/Login';
-import Register from './pages/Register';
 import AdminDashboard from './pages/AdminDashboard';
-import { AuthProvider } from './context/AuthContext';
+import Cart from './components/Cart';
+import CategorySection from './components/CategorySection';
 import Header from './components/Header';
 import HeroSection from './components/HeroSection';
+import Login from './pages/Login';
+import OrderHistory from './components/OrderHistory';
 import ProductGrid from './components/ProductGrid';
-import './App.css';
+import ProtectedRoute from './components/ProtectedRoute';
+import Register from './pages/Register';
+import UserProfile from './components/UserProfile';
 
 // Layout component that conditionally renders the header based on route
 function Layout({ children }: { children: React.ReactNode }) {
@@ -41,6 +42,7 @@ export default function App() {
               <Layout>
                 <>
                   <HeroSection />
+                  <CategorySection />
                   <ProductGrid />
                 </>
               </Layout>
