@@ -18,10 +18,6 @@ export default function SummarySection({ onSectionChange, onAddProduct }: Summar
   const totalProducts = products.length;
   const totalStock = products.reduce((sum, p) => sum + (p.stock || 0), 0);
   const totalCategories = [...new Set(products.map((p) => p.category))].length;
-  const totalRevenue = products.reduce(
-    (sum, p) => sum + (p.price || 0) * (p.stock ? Math.round(p.stock * 0.7) : 0),
-    0
-  );
 
   return (
     <section className="z-10">
