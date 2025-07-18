@@ -5,6 +5,7 @@ import { useAuth } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import LoginIcon from '../icons/LoginIcon';
 import { useCartStore } from '../store/cartStore';
+import { Squares2X2Icon } from '@heroicons/react/24/outline';
 
 export default function Header() {
   const { user, isAuthenticated, logout, isAdmin } = useAuth();
@@ -70,6 +71,22 @@ export default function Header() {
             {items.length}
           </span>
         </button>
+
+        {/* Quick Admin Access Button */}
+        {isAuthenticated && isAdmin && (
+          <button
+            className="relative flex items-center gap-2 bg-red-100 text-red-600 p-2 rounded-full hover:bg-red-200 transition-colors shadow-lg focus:outline-none focus:ring-2 focus:ring-red-400"
+            onClick={() => navigate('/admin/dashboard')}
+            aria-label="Admin Dashboard"
+            title="Admin Dashboard"
+          >
+            <Squares2X2Icon className="w-6 h-6" />
+            <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs font-bold px-1 py-0.5 rounded-full text-[10px]">
+              A
+            </span>
+          </button>
+        )}
+
         {isAuthenticated && user ? (
           <div className="relative">
             <button
@@ -106,16 +123,21 @@ export default function Header() {
                     My Dashboard
                   </button>
                   {isAdmin && (
-                    <button
-                      onClick={() => {
-                        navigate('/admin/dashboard');
-                        setShowUserMenu(false);
-                      }}
-                      className="w-full text-left px-4 py-2 hover:bg-gray-100 transition-colors text-red-600"
-                    >
-                      Admin Dashboard
-                    </button>
+                    <>
+                      <div className="border-t border-gray-200 my-2"></div>
+                      <button
+                        onClick={() => {
+                          navigate('/admin/dashboard');
+                          setShowUserMenu(false);
+                        }}
+                        className="w-full text-left px-4 py-2 hover:bg-red-50 transition-colors text-red-600 font-medium flex items-center gap-2"
+                      >
+                        <span className="text-xs bg-red-100 px-2 py-1 rounded-full">ADMIN</span>
+                        Admin Dashboard
+                      </button>
+                    </>
                   )}
+                  <div className="border-t border-gray-200 my-2"></div>
                   <button
                     onClick={handleLogout}
                     className="w-full text-left px-4 py-2 hover:bg-gray-100 transition-colors text-red-600"
