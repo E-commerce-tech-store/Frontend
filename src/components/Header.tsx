@@ -35,7 +35,7 @@ export default function Header() {
   return (
     <header
       className={`sticky top-0 left-0 w-full bg-white/90 backdrop-blur-lg border border-sky-600/20 rounded-3xl flex flex-col md:flex-row items-center justify-between px-8 py-4 mt-4 mb-2 gap-4 md:gap-0 overflow-hidden z-50 transition-all duration-300 ${
-        scrolled ? 'shadow-2xl bg-white/95' : 'shadow-xl'
+        scrolled ? 'shadow-2xl bg-white/70' : 'shadow-xl'
       }`}
       style={{ transition: 'box-shadow 0.3s, background 0.3s' }}
     >
@@ -72,7 +72,6 @@ export default function Header() {
           </span>
         </button>
 
-        {/* Quick Admin Access Button */}
         {isAuthenticated && isAdmin && (
           <button
             className="relative flex items-center gap-2 bg-red-100 text-red-600 p-2 rounded-full hover:bg-red-200 transition-colors shadow-lg focus:outline-none focus:ring-2 focus:ring-red-400"
@@ -81,13 +80,9 @@ export default function Header() {
             title="Admin Dashboard"
           >
             <Squares2X2Icon className="w-6 h-6" />
-            <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs font-bold px-1 py-0.5 rounded-full text-[10px]">
-              A
-            </span>
           </button>
         )}
 
-        {/* Quick Logout Button */}
         {isAuthenticated && (
           <button
             className="flex items-center gap-2 bg-gray-100 text-gray-600 p-2 rounded-full hover:bg-gray-200 transition-colors shadow-lg focus:outline-none focus:ring-2 focus:ring-gray-400"
@@ -118,7 +113,7 @@ export default function Header() {
             </button>
 
             {showUserMenu && (
-              <div className="absolute right-0 mt-2 w-64 bg-white border border-gray-200 rounded-lg shadow-lg z-50">
+              <div className="absolute right-0 mt-2 w-64 bg-white border border-gray-200 rounded-lg shadow-lg z-[100]">
                 <div className="p-4 border-b border-gray-200">
                   <p className="font-semibold text-gray-800">{user.name}</p>
                   <p className="text-sm text-gray-600">{user.email}</p>
