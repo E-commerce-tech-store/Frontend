@@ -2,7 +2,7 @@ import {
   ArrowRightEndOnRectangleIcon,
   ShoppingCartIcon,
   Squares2X2Icon,
-  UserIcon
+  UserCircleIcon
 } from '@heroicons/react/24/outline';
 
 import { useAuth } from '@features/auth/context/AuthContext';
@@ -165,7 +165,7 @@ export default function Header() {
             onClick={() => navigate('/login')}
             aria-label="Login"
           >
-            <UserIcon />
+            <UserCircleIcon className="size-9 text-gray-600" />
           </button>
         )}
       </div>

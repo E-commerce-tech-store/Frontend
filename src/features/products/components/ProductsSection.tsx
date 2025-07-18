@@ -1,7 +1,8 @@
 import { useState } from 'react';
-import { useProductStore } from '../store/productStore';
+import toast from 'react-hot-toast';
+import { useProducts, useDeleteProduct } from '../hooks/useProducts';
 import ProductForm from './ProductForm';
-import type { Product } from '../store/productStore';
+import type { Product } from '../interfaces/product';
 import {
   PlusIcon,
   PencilIcon,
@@ -11,7 +12,8 @@ import {
 } from '@heroicons/react/24/outline';
 
 export default function ProductsSection() {
-  const { products, deleteProduct } = useProductStore();
+  const { data: products = [] } = useProducts();
+  const deleteProductMutation = useDeleteProduct();
   const [showProductForm, setShowProductForm] = useState(false);
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState<string | null>(null);
@@ -40,9 +42,30 @@ export default function ProductsSection() {
   };
 
   // Handle delete product
-  const handleDeleteProduct = (productId: string) => {
-    deleteProduct(productId);
-    setShowDeleteConfirm(null);
+  const handleDeleteProduct = async (productId: string) => {
+    try {
+      await deleteProductMutation.mutateAsync(productId);
+      setShowDeleteConfirm(null);
+      toast.success('Producto eliminado exitosamente');
+    } catch (error: unknown) {
+      console.error('Error deleting product:', error);
+      if (error && typeof error === 'object' && 'response' in error) {
+        const axiosError = error as { response?: { data?: { message?: string | string[] } } };
+        const backendError = axiosError.response?.data?.message;
+
+        if (Array.isArray(backendError)) {
+          backendError.forEach((err) => toast.error(err));
+        } else if (typeof backendError === 'string') {
+          toast.error(backendError);
+        } else {
+          toast.error('Error al eliminar el producto');
+        }
+      } else if (error instanceof Error) {
+        toast.error(error.message);
+      } else {
+        toast.error('Error inesperado al eliminar el producto');
+      }
+    }
   };
 
   return (
@@ -97,9 +120,9 @@ export default function ProductsSection() {
                   className="border-b last:border-b-0 hover:bg-sky-50/40 transition"
                 >
                   <td className="py-3 px-4">
-                    {product.image ? (
+                    {product.image_url ? (
                       <img
-                        src={product.image}
+                        src={product.image_url}
                         alt={product.name}
                         className="w-12 h-12 object-cover rounded-md"
                       />
@@ -118,7 +141,7 @@ export default function ProductsSection() {
                   </td>
                   <td className="py-3 px-4">
                     <span className="px-2 py-1 bg-sky-100 text-sky-800 rounded-md text-xs">
-                      {product.category}
+                      {product.category || product.category_id || 'Sin categoría'}
                     </span>
                   </td>
                   <td className="py-3 px-4">
@@ -171,6 +194,7 @@ export default function ProductsSection() {
               </span>
               ? Esta acción no se puede deshacer.
             </p>
+
             <div className="flex justify-end gap-3">
               <button
                 onClick={() => setShowDeleteConfirm(null)}

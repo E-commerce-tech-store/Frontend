@@ -1,4 +1,4 @@
-import { useProductStore } from '@features/products/store/productStore';
+import { useProducts } from '@features/products/hooks/useProducts';
 import {
   PlusIcon,
   PencilIcon,
@@ -12,7 +12,7 @@ interface SummarySectionProps {
 }
 
 export default function SummarySection({ onSectionChange, onAddProduct }: SummarySectionProps) {
-  const { products } = useProductStore();
+  const { data: products = [] } = useProducts();
 
   // Calculate summary metrics
   const totalProducts = products.length;

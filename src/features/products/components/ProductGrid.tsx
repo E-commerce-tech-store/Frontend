@@ -1,15 +1,21 @@
 import { useState } from 'react';
+import toast from 'react-hot-toast';
 import { CheckCircleIcon } from '@heroicons/react/24/solid';
-import { useProductStore } from '../store/productStore';
+import { useProducts } from '../hooks/useProducts';
 import { useCartStore } from '@features/cart/store/cartStore';
 import { formatCOP } from '@shared/utils/formatCOP';
-import type { Product } from '../store/productStore';
+import type { Product } from '../interfaces/product';
 
 export default function ProductGrid() {
-  const { products } = useProductStore();
+  const { data: products = [], isLoading: loading, error } = useProducts();
   const { addToCart } = useCartStore();
   const [addedId, setAddedId] = useState<string | null>(null);
   const [quantities, setQuantities] = useState<{ [id: string]: number }>({});
+
+  // Show error toast if there's an error
+  if (error) {
+    toast.error('Error al cargar los productos');
+  }
 
   const handleAddToCart = (product: Product) => {
     const qty = quantities[product.id] || 1;
@@ -17,6 +23,21 @@ export default function ProductGrid() {
     setAddedId(product.id);
     setTimeout(() => setAddedId(null), 800);
   };
+
+  if (loading) {
+    return (
+      <section className="relative grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-10 py-10 z-10">
+        {[...Array(8)].map((_, i) => (
+          <div key={i} className="bg-white/90 rounded-3xl shadow-xl p-7 animate-pulse">
+            <div className="w-36 h-36 bg-gray-200 rounded-2xl mb-5 mx-auto" />
+            <div className="h-6 bg-gray-200 rounded mb-2" />
+            <div className="h-4 bg-gray-200 rounded mb-4" />
+            <div className="h-8 bg-gray-200 rounded" />
+          </div>
+        ))}
+      </section>
+    );
+  }
 
   return (
     <section className="relative grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-10 py-10 z-10">
@@ -34,7 +55,7 @@ export default function ProductGrid() {
             Nuevo
           </div>
           <img
-            src={product.image}
+            src={product.image_url}
             alt={product.name}
             className="w-36 h-36 object-contain mb-5 rounded-2xl bg-gray-50 shadow-md z-10 group-hover:scale-110 transition-transform duration-300"
           />

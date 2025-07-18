@@ -1,6 +1,8 @@
-import React, { useState } from 'react';
-import { useProductStore } from '@features/products/store/productStore';
-import type { Product } from '@features/products/store/productStore';
+import React, { useState, useEffect } from 'react';
+import toast from 'react-hot-toast';
+import { useCreateProduct, useUpdateProduct } from '../hooks/useProducts';
+import { useCategoryStore } from '@features/categories/store/categoryStore';
+import type { Product } from '@/features/products/interfaces/product';
 
 interface ProductFormProps {
   product?: Product;
@@ -9,12 +11,26 @@ interface ProductFormProps {
 
 export default function ProductForm({ product, onSave }: ProductFormProps) {
   const isEdit = !!product;
-  const [form, setForm] = useState<Product>(
-    product || { id: '', name: '', price: 0, category: '', stock: 0, description: '', image: '' }
-  );
-  const { addProduct, updateProduct } = useProductStore();
+  const [form, setForm] = useState({
+    name: product?.name ?? '',
+    price: product?.price ?? 0,
+    category_id: product?.category_id ?? '',
+    stock: product?.stock ?? 0,
+    description: product?.description ?? '',
+    image_url: product?.image_url ?? ''
+  });
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const createProductMutation = useCreateProduct();
+  const updateProductMutation = useUpdateProduct();
+  const { categories, fetchCategories } = useCategoryStore();
 
-  function handleChange(e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) {
+  useEffect(() => {
+    fetchCategories();
+  }, [fetchCategories]);
+
+  function handleChange(
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
+  ) {
     const { name, value } = e.target;
     setForm((f) => ({
       ...f,
@@ -22,15 +38,52 @@ export default function ProductForm({ product, onSave }: ProductFormProps) {
     }));
   }
 
-  function handleSubmit(e: React.FormEvent) {
+  async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    if (isEdit) {
-      updateProduct(form);
-    } else {
-      addProduct({ ...form, id: Date.now().toString() });
+    setIsSubmitting(true);
+
+    try {
+      if (isEdit && product) {
+        await updateProductMutation.mutateAsync({ id: product.id, data: form });
+        toast.success('Producto actualizado exitosamente');
+      } else {
+        await createProductMutation.mutateAsync(form);
+        toast.success('Producto creado exitosamente');
+      }
+      if (onSave) onSave();
+      if (!isEdit) {
+        setForm({
+          name: '',
+          price: 0,
+          category_id: '',
+          stock: 0,
+          description: '',
+          image_url: ''
+        });
+      }
+    } catch (error: unknown) {
+      console.error('Error saving product:', error);
+
+      // Handle validation errors from backend
+      if (error && typeof error === 'object' && 'response' in error) {
+        const axiosError = error as { response?: { data?: { message?: string | string[] } } };
+        const backendErrors = axiosError.response?.data?.message;
+
+        if (Array.isArray(backendErrors)) {
+          backendErrors.forEach((err) => toast.error(err));
+        } else if (typeof backendErrors === 'string') {
+          toast.error(backendErrors);
+        } else {
+          toast.error('Error al guardar el producto');
+        }
+      } else if (error instanceof Error) {
+        toast.error(error.message);
+      } else {
+        toast.error('Error inesperado al guardar el producto');
+      }
+    } finally {
+      setIsSubmitting(false);
     }
-    if (onSave) onSave();
-    setForm({ id: '', name: '', price: 0, category: '', stock: 0, description: '', image: '' });
   }
 
   return (
@@ -85,18 +138,24 @@ export default function ProductForm({ product, onSave }: ProductFormProps) {
       </div>
 
       <div className="mb-2">
-        <label htmlFor="category" className="block text-sm font-medium text-gray-700 mb-1">
+        <label htmlFor="categoryId" className="block text-sm font-medium text-gray-700 mb-1">
           Categoría
         </label>
-        <input
-          id="category"
-          name="category"
-          value={form.category}
+        <select
+          id="categoryId"
+          name="categoryId"
+          value={form.category_id}
           onChange={handleChange}
-          placeholder="Categoría del producto"
           className="w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-sky-500"
           required
-        />
+        >
+          <option value="">Seleccionar categoría</option>
+          {categories.map((category) => (
+            <option key={category.id} value={category.id}>
+              {category.name}
+            </option>
+          ))}
+        </select>
       </div>
 
       <div className="mb-2">
@@ -120,7 +179,7 @@ export default function ProductForm({ product, onSave }: ProductFormProps) {
         <input
           id="image"
           name="image"
-          value={form.image}
+          value={form.image_url}
           onChange={handleChange}
           placeholder="URL de la imagen del producto"
           className="w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-sky-500"
@@ -129,9 +188,12 @@ export default function ProductForm({ product, onSave }: ProductFormProps) {
 
       <button
         type="submit"
-        className="w-full py-2 px-4 bg-sky-600 hover:bg-sky-700 text-white rounded-lg transition-colors shadow-md font-medium"
+        disabled={isSubmitting}
+        className={`w-full py-2 px-4 text-white rounded-lg transition-colors shadow-md font-medium ${
+          isSubmitting ? 'bg-gray-400 cursor-not-allowed' : 'bg-sky-600 hover:bg-sky-700'
+        }`}
       >
-        {isEdit ? 'Actualizar' : 'Agregar'} Producto
+        {isSubmitting ? 'Guardando...' : isEdit ? 'Actualizar Producto' : 'Agregar Producto'}
       </button>
     </form>
   );

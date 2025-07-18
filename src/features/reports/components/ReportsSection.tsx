@@ -1,9 +1,9 @@
 import { useState } from 'react';
-import { useProductStore } from '@features/products/store/productStore';
+import { useProducts } from '@features/products/hooks/useProducts';
 import { ArrowDownIcon, ArrowUpIcon, ShoppingBagIcon } from '@heroicons/react/24/outline';
 
 export default function ReportsSection() {
-  const { products } = useProductStore();
+  const { data: products = [] } = useProducts();
 
   const [salesData] = useState([
     { month: 'Ene', sales: 1200000 },

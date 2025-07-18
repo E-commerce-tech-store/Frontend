@@ -6,6 +6,7 @@ import CategoriesSection from '@features/categories/components/CategoriesSection
 import ReportsSection from '@features/reports/components/ReportsSection';
 import OrdersSection from '@features/orders/components/OrdersSection';
 import UsersSection from '@features/users/components/UsersSection';
+import { useProducts } from '@features/products/hooks/useProducts';
 
 import {
   ChartBarIcon,
@@ -17,6 +18,9 @@ import {
 } from '@heroicons/react/24/outline';
 
 export default function AdminDashboard() {
+  // Fetch products data - TanStack Query will handle caching and refetching
+  useProducts();
+
   // Get path to determine which section to show
   const path = window.location.pathname;
 
