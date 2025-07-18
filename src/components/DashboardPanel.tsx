@@ -7,7 +7,6 @@ import {
   HomeIcon,
   ShoppingBagIcon,
   ChartBarIcon,
-  BellIcon,
   ArrowLeftIcon,
   ArrowRightIcon,
   TagIcon,
@@ -119,6 +118,7 @@ export default function DashboardPanel({
             <Link
               key={item.key}
               to={item.path || '#'}
+              replace
               className={`
                 text-left px-4 py-3 rounded-xl font-semibold transition-colors flex items-center
                 ${
@@ -160,9 +160,6 @@ export default function DashboardPanel({
         <div className="flex justify-between items-center mb-8 z-10">
           <h1 className="text-3xl font-black text-sky-700 tracking-tight">{title}</h1>
           <div className="flex items-center gap-4">
-            <button className="bg-white/80 p-2 rounded-full shadow hover:bg-white transition-colors">
-              <BellIcon className="h-5 w-5 text-gray-600" />
-            </button>
             <div className="flex items-center gap-3">
               <img
                 className="w-10 h-10 rounded-full object-cover border-2 border-sky-600/30 shadow"
