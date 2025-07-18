@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import type { ReactNode } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
 import Logo from '../icons/Logo';
 import {
   HomeIcon,
@@ -8,7 +9,11 @@ import {
   ChartBarIcon,
   BellIcon,
   ArrowLeftIcon,
-  ArrowRightIcon
+  ArrowRightIcon,
+  TagIcon,
+  ShoppingCartIcon,
+  UserGroupIcon,
+  ArrowRightStartOnRectangleIcon
 } from '@heroicons/react/24/outline';
 
 interface MenuItem {
@@ -36,25 +41,25 @@ const DEFAULT_MENU: MenuItem[] = [
     label: 'Reportes',
     path: '/admin/reports',
     icon: <ChartBarIcon className="h-5 w-5" />
+  },
+  {
+    key: 'categories',
+    label: 'Categorías',
+    path: '/admin/categories',
+    icon: <TagIcon className="h-5 w-5" />
+  },
+  {
+    key: 'orders',
+    label: 'Órdenes',
+    path: '/admin/orders',
+    icon: <ShoppingCartIcon className="h-5 w-5" />
+  },
+  {
+    key: 'users',
+    label: 'Usuarios',
+    path: '/admin/users',
+    icon: <UserGroupIcon className="h-5 w-5" />
   }
-  // {
-  //   key: 'categories',
-  //   label: 'Categorías',
-  //   path: '/admin/categories',
-  //   icon: <TagIcon className="h-5 w-5" />
-  // }
-  // {
-  //   key: 'orders',
-  //   label: 'Órdenes',
-  //   path: '/admin/orders',
-  //   icon: <ShoppingCartIcon className="h-5 w-5" />
-  // },
-  // {
-  //   key: 'users',
-  //   label: 'Usuarios',
-  //   path: '/admin/users',
-  //   icon: <UserGroupIcon className="h-5 w-5" />
-  // }
 ];
 
 interface DashboardPanelProps {
@@ -71,7 +76,13 @@ export default function DashboardPanel({
   activeKey = 'summary'
 }: DashboardPanelProps) {
   const navigate = useNavigate();
+  const { user, logout } = useAuth();
   const [collapsed, setCollapsed] = useState(false);
+
+  const handleLogout = () => {
+    logout();
+    navigate('/');
+  };
 
   return (
     <div className="min-h-screen flex bg-gradient-to-br from-white/90 via-sky-600/10 to-violet-100/60">
@@ -123,7 +134,7 @@ export default function DashboardPanel({
           ))}
         </nav>
 
-        <div className="mt-auto pt-4 border-t border-gray-100">
+        <div className="mt-auto pt-4 border-t border-gray-100 space-y-2">
           <Link
             to="/"
             className="flex items-center justify-center gap-2 text-gray-600 hover:text-sky-600 transition-colors px-4 py-2 rounded-xl"
@@ -131,6 +142,14 @@ export default function DashboardPanel({
             <HomeIcon className="h-5 w-5" />
             {!collapsed && <span>Ir a la tienda</span>}
           </Link>
+
+          <button
+            onClick={handleLogout}
+            className="w-full flex items-center justify-center gap-2 text-red-600 hover:text-red-700 hover:bg-red-50 transition-colors px-4 py-2 rounded-xl"
+          >
+            <ArrowRightStartOnRectangleIcon className="h-6 w-6" />
+            {!collapsed && <span>Cerrar Sesión</span>}
+          </button>
         </div>
       </aside>
 
@@ -151,9 +170,17 @@ export default function DashboardPanel({
                 alt="Avatar"
               />
               <div className="hidden md:block">
-                <p className="text-sm font-semibold text-gray-700">Admin User</p>
-                <p className="text-xs text-gray-500">admin@techcomp.com</p>
+                <p className="text-sm font-semibold text-gray-700">{user?.name || 'Admin User'}</p>
+                <p className="text-xs text-gray-500">{user?.email || 'admin@techcomp.com'}</p>
               </div>
+              <button
+                onClick={handleLogout}
+                className="ml-2 bg-red-100 hover:bg-red-200 text-red-600 p-2 rounded-full transition-colors shadow-sm"
+                title="Cerrar Sesión"
+                aria-label="Logout"
+              >
+                <ArrowRightStartOnRectangleIcon className="h-6 w-6" />
+              </button>
             </div>
           </div>
         </div>

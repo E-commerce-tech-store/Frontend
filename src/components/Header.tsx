@@ -5,7 +5,7 @@ import { useAuth } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import LoginIcon from '../icons/LoginIcon';
 import { useCartStore } from '../store/cartStore';
-import { Squares2X2Icon } from '@heroicons/react/24/outline';
+import { ArrowRightEndOnRectangleIcon, Squares2X2Icon } from '@heroicons/react/24/outline';
 
 export default function Header() {
   const { user, isAuthenticated, logout, isAdmin } = useAuth();
@@ -84,6 +84,18 @@ export default function Header() {
             <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs font-bold px-1 py-0.5 rounded-full text-[10px]">
               A
             </span>
+          </button>
+        )}
+
+        {/* Quick Logout Button */}
+        {isAuthenticated && (
+          <button
+            className="flex items-center gap-2 bg-gray-100 text-gray-600 p-2 rounded-full hover:bg-gray-200 transition-colors shadow-lg focus:outline-none focus:ring-2 focus:ring-gray-400"
+            onClick={handleLogout}
+            aria-label="Logout"
+            title="Cerrar Sesión"
+          >
+            <ArrowRightEndOnRectangleIcon className="h-6 w-6" />
           </button>
         )}
 
