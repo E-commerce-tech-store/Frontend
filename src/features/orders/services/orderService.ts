@@ -11,25 +11,37 @@ export interface CreateOrderRequest {
 
 export interface OrderItemResponse {
   id: string;
-  quantity: number;
-  price: number;
-  product: {
+  id_product: string;
+  id_order: string;
+  quantity: string;
+  subtotal: string;
+  current_price: string;
+  created_at: string;
+  tbl_products: {
     id: string;
+    category_id: string;
     name: string;
+    stock: string;
     description: string;
-    price: number;
+    price: string;
     image_url: string;
+    status: boolean;
+    created_at: string;
   };
 }
 
 export interface OrderResponse {
   id: string;
-  user_id: string;
-  status: string;
-  total: number;
+  id_user: string;
+  total: string;
   created_at: string;
-  updated_at: string;
-  items: OrderItemResponse[];
+  status: 'FINISHED' | 'PENDING' | 'CANCELLED';
+  tbl_order_details: OrderItemResponse[];
+  tbl_user: {
+    id: string;
+    name: string;
+    email: string;
+  };
 }
 
 export const orderService = {
@@ -61,5 +73,10 @@ export const orderService = {
   updateOrderStatus: async (id: string, status: string): Promise<OrderResponse> => {
     const response = await orderAPI.updateStatus(id, status);
     return response.data;
+  },
+
+  // Cancel order
+  cancelOrder: async (id: string): Promise<void> => {
+    await orderAPI.cancelOrder(id);
   }
 };

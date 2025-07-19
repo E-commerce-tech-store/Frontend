@@ -68,15 +68,18 @@ export const orderAPI = {
   create: (orderData: { items: { id_product: string; quantity: number }[] }) =>
     api.post('/orders', orderData),
 
-  // Get user's orders (User only)
+  // Get user's orders (User only) or all orders (Admin)
   getUserOrders: () => api.get('/orders'),
 
   // Get order by ID (User/Admin)
   getById: (id: string) => api.get(`/orders/${id}`),
 
-  // Get all orders (Admin only)
-  getAll: () => api.get('/orders/all'),
+  // Get all orders (Admin only) - same endpoint as getUserOrders but for admins
+  getAll: () => api.get('/orders'),
 
   // Update order status (Admin only)
-  updateStatus: (id: string, status: string) => api.patch(`/orders/${id}/status`, { status })
+  updateStatus: (id: string, status: string) => api.patch(`/orders/${id}`, { status }),
+
+  // Cancel order
+  cancelOrder: (id: string) => api.delete(`/orders/${id}`)
 };

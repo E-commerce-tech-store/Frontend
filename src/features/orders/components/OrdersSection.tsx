@@ -4,9 +4,31 @@ import {
   CheckCircleIcon,
   ClockIcon,
   XCircleIcon,
-  TruckIcon,
   MagnifyingGlassIcon
 } from '@heroicons/react/24/outline';
+import { useAllOrders, useUpdateOrderStatus, useCancelOrder } from '../hooks/useOrders';
+import { useAuthStatus } from '@features/auth/hooks/useAuth';
+import { formatCOP } from '@shared/utils/formatCOP';
+import type { OrderResponse } from '../services/orderService';
+
+// Helper function to transform API data to component format
+const transformOrderData = (apiOrder: OrderResponse): Order => {
+  return {
+    id: apiOrder.id,
+    orderNumber: `ORD-${apiOrder.id.slice(-8).toUpperCase()}`,
+    customerName: apiOrder.tbl_user.name,
+    customerEmail: apiOrder.tbl_user.email,
+    date: apiOrder.created_at,
+    status: apiOrder.status as Order['status'],
+    total: parseFloat(apiOrder.total),
+    items: apiOrder.tbl_order_details.map((item) => ({
+      id: item.id,
+      name: item.tbl_products.name,
+      quantity: parseInt(item.quantity),
+      price: parseFloat(item.current_price)
+    }))
+  };
+};
 
 interface Order {
   id: string;
@@ -14,7 +36,7 @@ interface Order {
   customerName: string;
   customerEmail: string;
   date: string;
-  status: 'pending' | 'processing' | 'shipped' | 'delivered' | 'cancelled';
+  status: 'FINISHED' | 'PENDING' | 'CANCELLED';
   total: number;
   items: Array<{
     id: string;
@@ -29,67 +51,19 @@ export default function OrdersSection() {
   const [searchTerm, setSearchTerm] = useState('');
   const [showOrderDetail, setShowOrderDetail] = useState<string | null>(null);
 
-  // Mock orders data
-  const [orders] = useState<Order[]>([
-    {
-      id: '1',
-      orderNumber: 'ORD-2024-001',
-      customerName: 'Juan Pérez',
-      customerEmail: 'juan.perez@email.com',
-      date: '2024-07-15',
-      status: 'delivered',
-      total: 2500000,
-      items: [{ id: '1', name: 'iPhone 15 Pro', quantity: 1, price: 2500000 }]
-    },
-    {
-      id: '2',
-      orderNumber: 'ORD-2024-002',
-      customerName: 'María García',
-      customerEmail: 'maria.garcia@email.com',
-      date: '2024-07-16',
-      status: 'shipped',
-      total: 1800000,
-      items: [{ id: '2', name: 'MacBook Air M2', quantity: 1, price: 1800000 }]
-    },
-    {
-      id: '3',
-      orderNumber: 'ORD-2024-003',
-      customerName: 'Carlos López',
-      customerEmail: 'carlos.lopez@email.com',
-      date: '2024-07-17',
-      status: 'processing',
-      total: 450000,
-      items: [{ id: '3', name: 'AirPods Pro', quantity: 1, price: 450000 }]
-    },
-    {
-      id: '4',
-      orderNumber: 'ORD-2024-004',
-      customerName: 'Ana Martínez',
-      customerEmail: 'ana.martinez@email.com',
-      date: '2024-07-18',
-      status: 'pending',
-      total: 3200000,
-      items: [{ id: '4', name: 'iMac 24"', quantity: 1, price: 3200000 }]
-    },
-    {
-      id: '5',
-      orderNumber: 'ORD-2024-005',
-      customerName: 'Luis Rodríguez',
-      customerEmail: 'luis.rodriguez@email.com',
-      date: '2024-07-10',
-      status: 'cancelled',
-      total: 850000,
-      items: [{ id: '5', name: 'iPad Air', quantity: 1, price: 850000 }]
-    }
-  ]);
+  const { isAdmin } = useAuthStatus();
+  const { data: ordersData, isLoading, error } = useAllOrders();
+  const updateOrderStatusMutation = useUpdateOrderStatus();
+  const cancelOrderMutation = useCancelOrder();
+
+  // Transform API data to component format
+  const orders: Order[] = ordersData ? ordersData.map(transformOrderData) : [];
 
   const getStatusBadge = (status: Order['status']) => {
     const statusConfig = {
-      pending: { color: 'bg-yellow-100 text-yellow-800', icon: ClockIcon, text: 'Pendiente' },
-      processing: { color: 'bg-blue-100 text-blue-800', icon: ClockIcon, text: 'Procesando' },
-      shipped: { color: 'bg-purple-100 text-purple-800', icon: TruckIcon, text: 'Enviado' },
-      delivered: { color: 'bg-green-100 text-green-800', icon: CheckCircleIcon, text: 'Entregado' },
-      cancelled: { color: 'bg-red-100 text-red-800', icon: XCircleIcon, text: 'Cancelado' }
+      PENDING: { color: 'bg-yellow-100 text-yellow-800', icon: ClockIcon, text: 'Pendiente' },
+      FINISHED: { color: 'bg-green-100 text-green-800', icon: CheckCircleIcon, text: 'Entregado' },
+      CANCELLED: { color: 'bg-red-100 text-red-800', icon: XCircleIcon, text: 'Cancelado' }
     };
 
     const config = statusConfig[status];
@@ -116,16 +90,56 @@ export default function OrdersSection() {
 
   const orderStats = {
     total: orders.length,
-    pending: orders.filter((o) => o.status === 'pending').length,
-    processing: orders.filter((o) => o.status === 'processing').length,
-    shipped: orders.filter((o) => o.status === 'shipped').length,
-    delivered: orders.filter((o) => o.status === 'delivered').length,
-    cancelled: orders.filter((o) => o.status === 'cancelled').length
+    pending: orders.filter((o) => o.status === 'PENDING').length,
+    delivered: orders.filter((o) => o.status === 'FINISHED').length,
+    cancelled: orders.filter((o) => o.status === 'CANCELLED').length
   };
 
   const totalRevenue = orders
-    .filter((o) => o.status === 'delivered')
+    .filter((o) => o.status === 'FINISHED')
     .reduce((sum, order) => sum + order.total, 0);
+
+  const handleStatusUpdate = async (orderId: string, newStatus: string) => {
+    try {
+      await updateOrderStatusMutation.mutateAsync({ id: orderId, status: newStatus });
+    } catch (error) {
+      console.error('Failed to update order status:', error);
+      // You might want to show a toast notification here
+    }
+  };
+
+  const handleCancelOrder = async (orderId: string) => {
+    try {
+      await cancelOrderMutation.mutateAsync(orderId);
+      setShowOrderDetail(null); // Close modal after canceling
+    } catch (error) {
+      console.error('Failed to cancel order:', error);
+      // You might want to show a toast notification here
+    }
+  };
+
+  if (isLoading) {
+    return (
+      <section className="z-10">
+        <div className="flex justify-center items-center py-12">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-sky-600"></div>
+        </div>
+      </section>
+    );
+  }
+
+  if (error) {
+    return (
+      <section className="z-10">
+        <div className="bg-red-50 border border-red-200 rounded-xl p-6 text-center">
+          <h3 className="text-lg font-semibold text-red-800 mb-2">Error al cargar los pedidos</h3>
+          <p className="text-red-600">
+            No se pudieron cargar los pedidos. Por favor, intenta nuevamente.
+          </p>
+        </div>
+      </section>
+    );
+  }
 
   return (
     <section className="z-10">
@@ -138,7 +152,7 @@ export default function OrdersSection() {
       </div>
 
       {/* Stats Cards */}
-      <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4 mb-6">
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
         <div className="bg-white/80 rounded-xl shadow p-4 text-center">
           <div className="text-2xl font-bold text-gray-800">{orderStats.total}</div>
           <div className="text-sm text-gray-500">Total</div>
@@ -148,21 +162,11 @@ export default function OrdersSection() {
           <div className="text-sm text-gray-500">Pendientes</div>
         </div>
         <div className="bg-white/80 rounded-xl shadow p-4 text-center">
-          <div className="text-2xl font-bold text-blue-600">{orderStats.processing}</div>
-          <div className="text-sm text-gray-500">Procesando</div>
-        </div>
-        <div className="bg-white/80 rounded-xl shadow p-4 text-center">
-          <div className="text-2xl font-bold text-purple-600">{orderStats.shipped}</div>
-          <div className="text-sm text-gray-500">Enviados</div>
-        </div>
-        <div className="bg-white/80 rounded-xl shadow p-4 text-center">
           <div className="text-2xl font-bold text-green-600">{orderStats.delivered}</div>
           <div className="text-sm text-gray-500">Entregados</div>
         </div>
         <div className="bg-white/80 rounded-xl shadow p-4 text-center">
-          <div className="text-2xl font-bold text-emerald-600">
-            {totalRevenue.toLocaleString('es-CO', { style: 'currency', currency: 'COP' })}
-          </div>
+          <div className="text-2xl font-bold text-emerald-600">{formatCOP(totalRevenue)}</div>
           <div className="text-sm text-gray-500">Ingresos</div>
         </div>
       </div>
@@ -189,11 +193,9 @@ export default function OrdersSection() {
               className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-sky-500 focus:border-transparent"
             >
               <option value="all">Todos los estados</option>
-              <option value="pending">Pendiente</option>
-              <option value="processing">Procesando</option>
-              <option value="shipped">Enviado</option>
-              <option value="delivered">Entregado</option>
-              <option value="cancelled">Cancelado</option>
+              <option value="PENDING">Pendiente</option>
+              <option value="FINISHED">Entregado</option>
+              <option value="CANCELLED">Cancelado</option>
             </select>
           </div>
         </div>
@@ -228,9 +230,7 @@ export default function OrdersSection() {
                   </td>
                   <td className="py-3 px-4">{new Date(order.date).toLocaleDateString('es-CO')}</td>
                   <td className="py-3 px-4">{getStatusBadge(order.status)}</td>
-                  <td className="py-3 px-4 font-medium">
-                    {order.total.toLocaleString('es-CO', { style: 'currency', currency: 'COP' })}
-                  </td>
+                  <td className="py-3 px-4 font-medium">{formatCOP(order.total)}</td>
                   <td className="py-3 px-4 text-right">
                     <button
                       onClick={() => setShowOrderDetail(order.id)}
@@ -300,13 +300,7 @@ export default function OrdersSection() {
                       <div className="space-y-2">
                         {getStatusBadge(order.status)}
                         <p className="text-sm text-gray-600">
-                          Total:{' '}
-                          <span className="font-bold text-lg">
-                            {order.total.toLocaleString('es-CO', {
-                              style: 'currency',
-                              currency: 'COP'
-                            })}
-                          </span>
+                          Total: <span className="font-bold text-lg">{formatCOP(order.total)}</span>
                         </p>
                       </div>
                     </div>
@@ -325,18 +319,9 @@ export default function OrdersSection() {
                             <p className="text-sm text-gray-600">Cantidad: {item.quantity}</p>
                           </div>
                           <div className="text-right">
-                            <p className="font-medium">
-                              {item.price.toLocaleString('es-CO', {
-                                style: 'currency',
-                                currency: 'COP'
-                              })}
-                            </p>
+                            <p className="font-medium">{formatCOP(item.price)}</p>
                             <p className="text-sm text-gray-600">
-                              Subtotal:{' '}
-                              {(item.price * item.quantity).toLocaleString('es-CO', {
-                                style: 'currency',
-                                currency: 'COP'
-                              })}
+                              Subtotal: {formatCOP(item.price * item.quantity)}
                             </p>
                           </div>
                         </div>
@@ -344,24 +329,22 @@ export default function OrdersSection() {
                     </div>
                   </div>
 
-                  {order.status !== 'cancelled' && order.status !== 'delivered' && (
+                  {order.status !== 'CANCELLED' && order.status !== 'FINISHED' && isAdmin && (
                     <div className="mt-6 pt-4 border-t border-gray-200 flex gap-3 justify-end">
-                      {order.status === 'pending' && (
-                        <button className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
-                          Marcar como Procesando
-                        </button>
-                      )}
-                      {order.status === 'processing' && (
-                        <button className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors">
-                          Marcar como Enviado
-                        </button>
-                      )}
-                      {order.status === 'shipped' && (
-                        <button className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors">
+                      {order.status === 'PENDING' && (
+                        <button
+                          onClick={() => handleStatusUpdate(order.id, 'FINISHED')}
+                          disabled={updateOrderStatusMutation.isPending}
+                          className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors disabled:opacity-50"
+                        >
                           Marcar como Entregado
                         </button>
                       )}
-                      <button className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors">
+                      <button
+                        onClick={() => handleCancelOrder(order.id)}
+                        disabled={cancelOrderMutation.isPending}
+                        className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors disabled:opacity-50"
+                      >
                         Cancelar Pedido
                       </button>
                     </div>

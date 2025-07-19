@@ -1,11 +1,5 @@
 import { useState } from 'react';
-import {
-  ClockIcon,
-  CheckCircleIcon,
-  TruckIcon,
-  XCircleIcon,
-  EyeIcon
-} from '@heroicons/react/24/outline';
+import { ClockIcon, CheckCircleIcon, XCircleIcon, EyeIcon } from '@heroicons/react/24/outline';
 import { formatCOP } from '@shared/utils/formatCOP';
 import { useUserOrders } from '../hooks/useOrders';
 import type { OrderResponse } from '../services/orderService';
@@ -16,33 +10,23 @@ export default function OrderHistory() {
 
   const getStatusInfo = (status: string) => {
     const statusConfig = {
-      pending: {
+      PENDING: {
         color: 'bg-yellow-100 text-yellow-800',
         icon: ClockIcon,
         text: 'Pendiente'
       },
-      processing: {
-        color: 'bg-blue-100 text-blue-800',
-        icon: ClockIcon,
-        text: 'Procesando'
-      },
-      shipped: {
-        color: 'bg-purple-100 text-purple-800',
-        icon: TruckIcon,
-        text: 'Enviado'
-      },
-      delivered: {
+      FINISHED: {
         color: 'bg-green-100 text-green-800',
         icon: CheckCircleIcon,
         text: 'Entregado'
       },
-      cancelled: {
+      CANCELLED: {
         color: 'bg-red-100 text-red-800',
         icon: XCircleIcon,
         text: 'Cancelado'
       }
     };
-    return statusConfig[status as keyof typeof statusConfig] || statusConfig.pending;
+    return statusConfig[status as keyof typeof statusConfig] || statusConfig.PENDING;
   };
 
   const formatDate = (dateString: string) => {
@@ -133,9 +117,11 @@ export default function OrderHistory() {
                         <p>Fecha: {formatDate(order.created_at)}</p>
                         <p>
                           Total:{' '}
-                          <span className="font-bold text-sky-600">{formatCOP(order.total)}</span>
+                          <span className="font-bold text-sky-600">
+                            {formatCOP(parseFloat(order.total))}
+                          </span>
                         </p>
-                        <p>Items: {order.items?.length} producto(s)</p>
+                        <p>Items: {order.tbl_order_details?.length} producto(s)</p>
                       </div>
                     </div>
 
@@ -193,7 +179,7 @@ export default function OrderHistory() {
                   <p>
                     <span className="font-medium">Total:</span>{' '}
                     <span className="font-bold text-lg text-sky-600">
-                      {formatCOP(selectedOrder.total)}
+                      {formatCOP(parseFloat(selectedOrder.total))}
                     </span>
                   </p>
                 </div>
@@ -203,22 +189,22 @@ export default function OrderHistory() {
             <div>
               <h4 className="font-semibold text-gray-800 mb-3">Productos</h4>
               <div className="space-y-3">
-                {selectedOrder.items.map((item) => (
+                {selectedOrder.tbl_order_details.map((item) => (
                   <div key={item.id} className="flex items-center gap-4 p-4 bg-gray-50 rounded-lg">
                     <img
-                      src={item.product.image_url}
-                      alt={item.product.name}
+                      src={item.tbl_products.image_url}
+                      alt={item.tbl_products.name}
                       className="w-16 h-16 object-contain rounded-lg bg-white border"
                     />
                     <div className="flex-1">
-                      <h5 className="font-semibold text-gray-800">{item.product.name}</h5>
-                      <p className="text-gray-600 text-sm">{item.product.description}</p>
+                      <h5 className="font-semibold text-gray-800">{item.tbl_products.name}</h5>
+                      <p className="text-gray-600 text-sm">{item.tbl_products.description}</p>
                       <div className="flex justify-between items-center mt-2">
                         <span className="text-gray-600">
-                          Cantidad: {item.quantity} × {formatCOP(item.price)}
+                          Cantidad: {item.quantity} × {formatCOP(parseFloat(item.current_price))}
                         </span>
                         <span className="font-bold text-sky-600">
-                          {formatCOP(item.price * item.quantity)}
+                          {formatCOP(parseFloat(item.subtotal))}
                         </span>
                       </div>
                     </div>

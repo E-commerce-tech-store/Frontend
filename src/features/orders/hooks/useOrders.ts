@@ -79,3 +79,23 @@ export const useUpdateOrderStatus = () => {
     }
   });
 };
+
+// Cancel order
+export const useCancelOrder = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (id: string) => orderService.cancelOrder(id),
+    onSuccess: (_, orderId) => {
+      // Invalidate orders lists to refetch
+      queryClient.invalidateQueries({ queryKey: orderKeys.userOrders() });
+      queryClient.invalidateQueries({ queryKey: orderKeys.adminOrders() });
+      // Remove the specific order from cache
+      queryClient.removeQueries({ queryKey: orderKeys.detail(orderId) });
+    },
+    onError: (error) => {
+      console.error('Failed to cancel order:', error);
+      throw error; // Re-throw for component error handling
+    }
+  });
+};

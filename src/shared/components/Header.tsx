@@ -2,7 +2,8 @@ import {
   ArrowRightEndOnRectangleIcon,
   ShoppingCartIcon,
   Squares2X2Icon,
-  UserCircleIcon
+  UserCircleIcon,
+  ClipboardDocumentListIcon
 } from '@heroicons/react/24/outline';
 
 import { useAuth } from '@features/auth/context/AuthContext';
@@ -76,6 +77,17 @@ export default function Header() {
           </span>
         </button>
 
+        {isAuthenticated && (
+          <button
+            className="relative flex items-center gap-2 bg-green-100 text-green-600 p-2 rounded-full hover:bg-green-200 transition-colors shadow-lg focus:outline-none focus:ring-2 focus:ring-green-400"
+            onClick={() => navigate('/orders')}
+            aria-label="Order History"
+            title="Mis Pedidos"
+          >
+            <ClipboardDocumentListIcon className="w-6 h-6" />
+          </button>
+        )}
+
         {isAuthenticated && isAdmin && (
           <button
             className="relative flex items-center gap-2 bg-red-100 text-red-600 p-2 rounded-full hover:bg-red-200 transition-colors shadow-lg focus:outline-none focus:ring-2 focus:ring-red-400"
@@ -132,6 +144,15 @@ export default function Header() {
                     className="w-full text-left px-4 py-2 hover:bg-gray-100 transition-colors"
                   >
                     My Dashboard
+                  </button>
+                  <button
+                    onClick={() => {
+                      navigate('/orders');
+                      setShowUserMenu(false);
+                    }}
+                    className="w-full text-left px-4 py-2 hover:bg-gray-100 transition-colors"
+                  >
+                    Mis Pedidos
                   </button>
                   {isAdmin && (
                     <>
