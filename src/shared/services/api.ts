@@ -61,3 +61,22 @@ export const categoryAPI = {
   // Delete category (Admin only)
   delete: (id: string) => api.delete(`/categories/${id}`)
 };
+
+// Order API endpoints
+export const orderAPI = {
+  // Create new order (User only)
+  create: (orderData: { items: { id_product: string; quantity: number }[] }) =>
+    api.post('/orders', orderData),
+
+  // Get user's orders (User only)
+  getUserOrders: () => api.get('/orders'),
+
+  // Get order by ID (User/Admin)
+  getById: (id: string) => api.get(`/orders/${id}`),
+
+  // Get all orders (Admin only)
+  getAll: () => api.get('/orders/all'),
+
+  // Update order status (Admin only)
+  updateStatus: (id: string, status: string) => api.patch(`/orders/${id}/status`, { status })
+};

@@ -14,7 +14,7 @@ import Logo from '@shared/components/Logo';
 export default function Header() {
   const { user, isAuthenticated, logout, isAdmin } = useAuth();
   const navigate = useNavigate();
-  const { items } = useCartStore();
+  const { getTotalItems } = useCartStore();
   const [scrolled, setScrolled] = useState(false);
   const [showUserMenu, setShowUserMenu] = useState(false);
 
@@ -72,7 +72,7 @@ export default function Header() {
         >
           <ShoppingCartIcon width={24} />
           <span className="absolute -top-1 -right-1 bg-sky-600 text-white text-xs font-bold px-1.5 py-0.5 rounded-full shadow">
-            {items.length}
+            {getTotalItems()}
           </span>
         </button>
 
