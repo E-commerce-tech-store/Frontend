@@ -128,7 +128,7 @@ export default function Header() {
               )}
             </button>
 
-            {showUserMenu && (
+            {/* {showUserMenu && (
               <div className="absolute right-0 mt-2 w-64 bg-white border border-gray-200 rounded-lg shadow-lg z-[100]">
                 <div className="p-4 border-b border-gray-200">
                   <p className="font-semibold text-gray-800">{user.name}</p>
@@ -178,7 +178,7 @@ export default function Header() {
                   </button>
                 </div>
               </div>
-            )}
+            )} */}
           </div>
         ) : (
           <button

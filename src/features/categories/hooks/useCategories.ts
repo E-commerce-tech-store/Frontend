@@ -5,12 +5,13 @@ export type Category = {
   id: string;
   name: string;
   description: string;
-  createdAt?: string;
-  updatedAt?: string;
+  created_at?: string;
 };
 
 export type CategoryWithCount = Category & {
-  productCount?: number;
+  _count?: {
+    tbl_products?: number;
+  };
 };
 
 export type CategoryFormData = {

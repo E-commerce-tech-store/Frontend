@@ -7,6 +7,7 @@ export interface Category {
   name: string;
   status: boolean;
   created_at: string;
+  description: string;
   _count: {
     tbl_products: number;
   };

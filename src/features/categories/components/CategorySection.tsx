@@ -131,7 +131,7 @@ export default function CategorySection() {
               {/* Product count */}
               <div className="relative z-10 text-center">
                 <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-sky-100 text-sky-800">
-                  {category.productCount || 0} productos
+                  {category._count?.tbl_products || 0} productos
                 </span>
               </div>
 
