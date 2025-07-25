@@ -105,7 +105,7 @@ export default function Register() {
       <div className="absolute -top-8 -left-8 w-24 h-24 bg-sky-600/20 rounded-full blur-xl opacity-40 pointer-events-none animate-pulse" />
       <div className="absolute -bottom-8 -right-8 w-20 h-20 bg-violet-200/30 rounded-full blur-lg opacity-30 pointer-events-none animate-pulse" />
 
-      <h2 className="text-2xl font-bold mb-6 text-gray-900 z-10">Register</h2>
+      <h2 className="text-2xl font-bold mb-6 text-gray-900 z-10">Registrarse</h2>
 
       <form onSubmit={handleRegister} className="w-full z-10">
         <div className="mb-4">
@@ -129,7 +129,7 @@ export default function Register() {
           <input
             type="email"
             name="email"
-            placeholder="Email"
+            placeholder="Correo electrónico"
             value={formData.email}
             onChange={handleInputChange}
             className={`w-full px-3 py-2 border rounded-2xl focus:outline-none focus:ring-2 bg-white/80 shadow-sm ${
@@ -146,7 +146,7 @@ export default function Register() {
           <input
             type="password"
             name="password"
-            placeholder="Password"
+            placeholder="Contraseña"
             value={formData.password}
             onChange={handleInputChange}
             className={`w-full px-3 py-2 border rounded-2xl focus:outline-none focus:ring-2 bg-white/80 shadow-sm ${
@@ -163,7 +163,7 @@ export default function Register() {
           <input
             type="password"
             name="confirmPassword"
-            placeholder="Confirm Password"
+            placeholder="Confirmar contraseña"
             value={formData.confirmPassword}
             onChange={handleInputChange}
             className={`w-full px-3 py-2 border rounded-2xl focus:outline-none focus:ring-2 bg-white/80 shadow-sm ${
@@ -183,13 +183,13 @@ export default function Register() {
           disabled={registerMutation.isPending}
           className="w-full bg-gray-800 hover:bg-gray-900 disabled:bg-gray-400 disabled:cursor-not-allowed text-white font-semibold py-2 rounded-2xl transition-colors mb-2 shadow"
         >
-          {registerMutation.isPending ? 'Creating account...' : 'Register'}
+          {registerMutation.isPending ? 'Creando cuenta...' : 'Registrarse'}
         </button>
       </form>
 
       <div className="mt-2 z-10">
         <Link to="/login" className="text-sky-600 hover:underline">
-          Already have an account? Login
+          ¿Ya tienes una cuenta? Inicia sesión aquí
         </Link>
       </div>
     </div>

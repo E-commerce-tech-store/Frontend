@@ -64,17 +64,16 @@ export default function Login({ redirectToDashboard }: { redirectToDashboard?: b
 
   return (
     <div className="relative max-w-sm mx-auto mt-20 p-8 bg-gradient-to-br from-white/90 via-sky-600/10 to-violet-100/60 rounded-3xl shadow-lg border border-gray-100 flex flex-col items-center overflow-hidden">
-      {/* Blurred background shapes */}
       <div className="absolute -top-8 -left-8 w-24 h-24 bg-sky-600/20 rounded-full blur-xl opacity-40 pointer-events-none animate-pulse" />
       <div className="absolute -bottom-8 -right-8 w-20 h-20 bg-violet-200/30 rounded-full blur-lg opacity-30 pointer-events-none animate-pulse" />
 
-      <h2 className="text-2xl font-bold mb-6 text-gray-900 z-10">Login</h2>
+      <h2 className="text-2xl font-bold mb-6 text-gray-900 z-10">Iniciar sesión</h2>
 
       <form onSubmit={handleLogin} className="w-full z-10">
         <div className="mb-4">
           <input
             type="email"
-            placeholder="Email"
+            placeholder="Correo electrónico"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             className={`w-full px-3 py-2 border rounded-2xl focus:outline-none focus:ring-2 bg-white/80 shadow-sm ${
@@ -90,7 +89,7 @@ export default function Login({ redirectToDashboard }: { redirectToDashboard?: b
         <div className="mb-6">
           <input
             type="password"
-            placeholder="Password"
+            placeholder="Contraseña"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             className={`w-full px-3 py-2 border rounded-2xl focus:outline-none focus:ring-2 bg-white/80 shadow-sm ${
@@ -108,13 +107,13 @@ export default function Login({ redirectToDashboard }: { redirectToDashboard?: b
           disabled={loginMutation.isPending}
           className="w-full bg-gray-800 hover:bg-gray-900 disabled:bg-gray-400 disabled:cursor-not-allowed text-white font-semibold py-2 rounded-2xl transition-colors mb-4 shadow"
         >
-          {loginMutation.isPending ? 'Logging in...' : 'Login'}
+          {loginMutation.isPending ? 'Iniciando sesión...' : 'Iniciar sesión'}
         </button>
       </form>
 
       <div className="mt-2 z-10">
         <Link to="/register" className="text-sky-600 hover:underline">
-          Don't have an account? Register
+          ¿No tienes una cuenta? Regístrate aquí
         </Link>
       </div>
     </div>
