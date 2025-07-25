@@ -4,15 +4,15 @@ import {
   EnvelopeIcon,
   CalendarIcon,
   EyeIcon,
-  PencilIcon,
-  TrashIcon,
+  // PencilIcon,
+  // TrashIcon,
   XMarkIcon,
   MagnifyingGlassIcon,
   ShieldCheckIcon,
   UserGroupIcon,
   PlusIcon
 } from '@heroicons/react/24/outline';
-import { useUsers, useUserStats, useUpdateUserStatus, useDeleteUser } from '../hooks/useUsers';
+import { useUsers, useUserStats, useUpdateUserStatus } from '../hooks/useUsers';
 import UserForm from './UserForm';
 import type { User } from '../services/userService';
 
@@ -27,7 +27,7 @@ export default function UsersSection() {
   const { data: users = [], isLoading: usersLoading, error: usersError } = useUsers();
   const { data: userStats, isLoading: statsLoading } = useUserStats();
   const updateUserStatus = useUpdateUserStatus();
-  const deleteUser = useDeleteUser();
+  // const deleteUser = useDeleteUser();
 
   // Handle loading state
   if (usersLoading || statsLoading) {
@@ -111,11 +111,11 @@ export default function UsersSection() {
     updateUserStatus.mutate({ id: userId, status: newStatus });
   };
 
-  const handleDeleteUser = (userId: string) => {
-    if (window.confirm('¿Estás seguro de que quieres eliminar este usuario?')) {
-      deleteUser.mutate(userId);
-    }
-  };
+  // const handleDeleteUser = (userId: string) => {
+  //   if (window.confirm('¿Estás seguro de que quieres eliminar este usuario?')) {
+  //     deleteUser.mutate(userId);
+  //   }
+  // };
 
   return (
     <section className="z-10">
@@ -261,7 +261,7 @@ export default function UsersSection() {
                       >
                         <EyeIcon className="h-4 w-4" />
                       </button>
-                      <button
+                      {/* <button
                         className="p-1.5 bg-yellow-100 rounded-md text-yellow-700 hover:bg-yellow-200 transition-colors"
                         title="Editar usuario"
                       >
@@ -275,7 +275,7 @@ export default function UsersSection() {
                         >
                           <TrashIcon className="h-4 w-4" />
                         </button>
-                      )}
+                      )} */}
                     </div>
                   </td>
                 </tr>
