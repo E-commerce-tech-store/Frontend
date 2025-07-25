@@ -14,6 +14,8 @@ import ProtectedRoute from '@shared/components/ProtectedRoute';
 import Register from '@features/auth/components/Register';
 import UserProfile from '@features/users/components/UserProfile';
 
+console.log('ENV', import.meta.env.VITE_API_URL); // Log the current mode (development or production)
+
 // Layout component that conditionally renders the header based on route
 function Layout({ children }: { children: React.ReactNode }) {
   const location = useLocation();
