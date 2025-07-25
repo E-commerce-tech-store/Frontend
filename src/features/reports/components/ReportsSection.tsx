@@ -1,38 +1,32 @@
-import { useState } from 'react';
-import { useProducts } from '@features/products/hooks/useProducts';
-import { ArrowDownIcon, ArrowUpIcon, ShoppingBagIcon } from '@heroicons/react/24/outline';
+// import { useState } from 'react';
+// import { useProducts } from '@features/products/hooks/useProducts';
+// import { ArrowDownIcon, ArrowUpIcon, ShoppingBagIcon } from '@heroicons/react/24/outline';
 
 export default function ReportsSection() {
-  const { data: products = [] } = useProducts();
+  // const { data: products = [] } = useProducts();
 
-  const [salesData] = useState([
-    { month: 'Ene', sales: 1200000 },
-    { month: 'Feb', sales: 1500000 },
-    { month: 'Mar', sales: 1800000 },
-    { month: 'Abr', sales: 1400000 },
-    { month: 'May', sales: 1600000 },
-    { month: 'Jun', sales: 2100000 }
-  ]);
+  // const [salesData] = useState([
+  //   { month: 'Ene', sales: 1200000 },
+  //   { month: 'Feb', sales: 1500000 },
+  //   { month: 'Mar', sales: 1800000 },
+  //   { month: 'Abr', sales: 1400000 },
+  //   { month: 'May', sales: 1600000 },
+  //   { month: 'Jun', sales: 2100000 }
+  // ]);
 
-  // Calculate month-over-month growth
-  const currentMonthSales = salesData[salesData.length - 1]?.sales || 0;
-  const previousMonthSales = salesData[salesData.length - 2]?.sales || 0;
+  // // Calculate month-over-month growth
+  // const currentMonthSales = salesData[salesData.length - 1]?.sales || 0;
+  // const previousMonthSales = salesData[salesData.length - 2]?.sales || 0;
 
   return (
     <section className="z-10">
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+      {/* <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
         <div className="bg-white/90 rounded-2xl shadow p-6">
           <h3 className="text-lg font-bold text-gray-800 mb-4">Ventas Mensuales</h3>
           <div className="h-60 relative">
-            {/* Simple SVG bar chart representing monthly sales */}
             <svg className="w-full h-full" viewBox="0 0 300 150">
-              {/* Y axis */}
               <line x1="40" y1="10" x2="40" y2="130" stroke="#e5e7eb" strokeWidth="2" />
-
-              {/* X axis */}
               <line x1="40" y1="130" x2="290" y2="130" stroke="#e5e7eb" strokeWidth="2" />
-
-              {/* Bars - hardcoded for UI mockup */}
               <rect x="50" y="90" width="30" height="40" fill="#0369a1" rx="3" />
               <rect x="90" y="70" width="30" height="60" fill="#0369a1" rx="3" />
               <rect x="130" y="50" width="30" height="80" fill="#0369a1" rx="3" />
@@ -40,7 +34,6 @@ export default function ReportsSection() {
               <rect x="210" y="60" width="30" height="70" fill="#0369a1" rx="3" />
               <rect x="250" y="30" width="30" height="100" fill="#0284c7" rx="3" />
 
-              {/* Labels */}
               <text x="65" y="145" textAnchor="middle" fontSize="12" fill="#6b7280">
                 Ene
               </text>
@@ -98,9 +91,7 @@ export default function ReportsSection() {
         <div className="bg-white/90 rounded-2xl shadow p-6">
           <h3 className="text-lg font-bold text-gray-800 mb-4">Ventas por Categoría</h3>
           <div className="h-60 relative">
-            {/* Simple SVG pie chart representing category distribution */}
             <svg className="w-full h-full" viewBox="0 0 200 200">
-              {/* Simple pie chart - hardcoded for UI mockup */}
               <circle
                 cx="100"
                 cy="100"
@@ -146,7 +137,6 @@ export default function ReportsSection() {
             </thead>
             <tbody>
               {products.slice(0, 5).map((p, index) => {
-                // Generate mock sales data for the report
                 const soldUnits = Math.round((5 - index) * 3 + Math.random() * 10);
                 const revenue = soldUnits * p.price;
 
@@ -187,7 +177,7 @@ export default function ReportsSection() {
             Descargar reporte completo
           </button>
         </div>
-      </div>
+      </div> */}
     </section>
   );
 }
