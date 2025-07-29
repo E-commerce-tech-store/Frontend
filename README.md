@@ -1,4 +1,10 @@
 # 📚 Documentación de Desarrollo - Frontend E-commerce
+<img width="1920" height="1440" alt="image" src="https://github.com/user-attachments/assets/562ab754-4256-47a0-8a1f-d46ffe351177" />
+<img width="1920" height="1440" alt="image" src="https://github.com/user-attachments/assets/2b73bfda-da8d-4486-9b17-187af2dc8f66" />
+<img width="1920" height="1440" alt="image" src="https://github.com/user-attachments/assets/bb98e38a-e9f9-4284-9caf-9beb53647439" />
+
+
+
 
 ## 📋 Índice
 
